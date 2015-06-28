@@ -1,5 +1,8 @@
 package net.pikrass.sporz;
 
+import net.pikrass.sporz.actions.*;
+import net.pikrass.sporz.events.*;
+
 public abstract class Player
 {
 	public static final Player NOBODY = new Nobody();
@@ -21,8 +24,11 @@ public abstract class Player
 		return false;
 	}
 
-
 	public abstract void notifyRound(int num, RoundPeriod period);
+	public abstract void notify(NewCaptain event);
+
+	public abstract void ask(Game game, ElectCaptain action);
+	public abstract void stopAsking(ElectCaptain action);
 
 
 	@Override
@@ -53,5 +59,9 @@ public abstract class Player
 		}
 
 		public void notifyRound(int num, RoundPeriod period) { }
+		public void notify(NewCaptain event) { }
+
+		public void ask(Game game, ElectCaptain action) { }
+		public void stopAsking(ElectCaptain action) { }
 	}
 }
