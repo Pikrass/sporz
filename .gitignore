@@ -1,0 +1,9 @@
+# Editor back-ups
+*.sw[op]
+*~
+
+# Personal state
+.gradle
+
+# Compiled files
+/build
