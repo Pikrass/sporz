@@ -2,6 +2,8 @@ package net.pikrass.sporz;
 
 public abstract class Player
 {
+	public static final Player NOBODY = new Nobody();
+
 	private String name;
 	private State state;
 	private Genome genome;
@@ -13,6 +15,10 @@ public abstract class Player
 
 	public String getName() {
 		return name;
+	}
+
+	public boolean isNobody() {
+		return false;
 	}
 
 
@@ -35,5 +41,17 @@ public abstract class Player
 	@Override
 	public int hashCode() {
 		return getName().hashCode();
+	}
+
+
+	private static class Nobody extends Player {
+		public Nobody() {
+			super("");
+		}
+		public boolean isNobody() {
+			return true;
+		}
+
+		public void notifyRound(int num, RoundPeriod period) { }
 	}
 }
