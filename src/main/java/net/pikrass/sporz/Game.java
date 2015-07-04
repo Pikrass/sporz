@@ -1,5 +1,7 @@
 package net.pikrass.sporz;
 
+import net.pikrass.sporz.actions.SwitchPeriod;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.LinkedList;
@@ -12,6 +14,9 @@ public class Game
 
 	private Map<String, Player> players;
 
+	private int round;
+	private RoundPeriod period;
+
 	private List<Phase> phases;
 	private Phase captainPhase, mutantsPhase, doctorsPhase, infoPhase, dayPhase;
 	private PhaseIterator curPhase;
@@ -20,6 +25,9 @@ public class Game
 		this.started = false;
 
 		this.players = new HashMap<String, Player>();
+
+		this.round = 0;
+		this.period = RoundPeriod.NIGHT;
 
 		this.captainPhase = new Phase(this);
 		this.mutantsPhase = new Phase(this);
@@ -36,6 +44,9 @@ public class Game
 	}
 
 	public void start() {
+		mutantsPhase.addAction(new SwitchPeriod(this));
+		dayPhase.addAction(new SwitchPeriod(this));
+
 		curPhase = new PhaseIterator(phases);
 
 		// Skip all phases but the captain one for day 0
@@ -60,6 +71,18 @@ public class Game
 
 	public int getNbPlayers() {
 		return players.size();
+	}
+
+	public void nextPeriod() {
+		if(period == RoundPeriod.NIGHT) {
+			period = RoundPeriod.DAY;
+		} else {
+			period = RoundPeriod.NIGHT;
+			round++;
+		}
+
+		for(Player p : players.values())
+			p.notifyRound(round, period);
 	}
 
 	public void phaseEnded(Phase p) {

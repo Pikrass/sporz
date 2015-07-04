@@ -15,6 +15,10 @@ public abstract class Player
 		return name;
 	}
 
+
+	public abstract void notifyRound(int num, RoundPeriod period);
+
+
 	@Override
 	public String toString() {
 		return name;
