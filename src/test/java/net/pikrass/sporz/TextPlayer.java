@@ -145,6 +145,23 @@ public class TextPlayer extends Player
 		//Note: we should tell the role, genome and state of the victim too
 	}
 
+	@Override
+	public void notifyOrigin(Healing.NoResult event) {
+		out.println("We tried to heal "+event.getTarget());
+	}
+
+	@Override
+	public void notifyTarget(Healing event) {
+		switch(event.getResult()) {
+			case SUCCESS:
+				out.println("You've been healed (it suceeded)"); break;
+			case FAIL:
+				out.println("They tried to heal you but it failed"); break;
+			case USELESS:
+				out.println("You've been healed (it was useless)"); break;
+		}
+	}
+
 
 	@Override
 	public void ask(final Game game, final ElectCaptain action) {
@@ -243,12 +260,70 @@ public class TextPlayer extends Player
 	}
 
 	@Override
+	public void ask(final Game game, final DoctorsAction action) {
+		this.sink = (new Thread() {
+			Pattern cmdRegexp = Pattern.compile("(heal|kill) (.+)");
+
+			@Override
+			public void run() {
+				out.println("Doctors! You can either heal or kill.");
+
+				while(true) {
+					out.print("> ");
+
+					String cmd = null;
+					synchronized (line) {
+						try {
+							line.wait();
+						} catch(InterruptedException e) {
+							return;
+						}
+						cmd = line.toString();
+					}
+
+					Matcher m = cmdRegexp.matcher(cmd);
+					if(!m.matches()) {
+						out.println("I expect kill or heal (with a target)");
+						continue;
+					}
+
+					Player p;
+					if(m.group(2).equals("nobody"))
+						p = Player.NOBODY;
+					else
+						p = game.getPlayer(m.group(2));
+
+					if(p == null) {
+						out.println("This player doesn't exist!");
+						continue;
+					}
+
+					DoctorsAction.DoctorChoice choice;
+					if(m.group(1).equals("kill"))
+						choice = action.new Kill(p);
+					else
+						choice = action.new Heal(p);
+
+					action.choose(TextPlayer.this, choice);
+				}
+			}
+		});
+
+		this.sink.start();
+	}
+
+	@Override
 	public void stopAsking(ElectCaptain action) {
 		this.sink.interrupt();
 	}
 
 	@Override
 	public void stopAsking(MutantsActions action) {
+		this.sink.interrupt();
+	}
+
+	@Override
+	public void stopAsking(DoctorsAction action) {
 		this.sink.interrupt();
 	}
 }

@@ -3,6 +3,7 @@ package net.pikrass.sporz;
 import net.pikrass.sporz.actions.SwitchPeriod;
 import net.pikrass.sporz.actions.ElectCaptain;
 import net.pikrass.sporz.actions.MutantsActions;
+import net.pikrass.sporz.actions.DoctorsAction;
 import net.pikrass.sporz.actions.ResetParalysis;
 
 import java.util.HashMap;
@@ -51,6 +52,7 @@ public class Game
 	public void start() {
 		mutantsPhase.addAction(new SwitchPeriod(this));
 		mutantsPhase.addAction(new MutantsActions(this));
+		doctorsPhase.addAction(new DoctorsAction(this));
 		dayPhase.addAction(new SwitchPeriod(this));
 		dayPhase.addAction(new ResetParalysis(this));
 		dayPhase.addAction(new ElectCaptain(this));

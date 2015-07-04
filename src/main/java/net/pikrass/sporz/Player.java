@@ -68,6 +68,17 @@ public abstract class Player
 		return Result.SUCCESS;
 	}
 
+	public Result heal() {
+		if(state == State.HUMAN)
+			return Result.USELESS;
+
+		if(genome == Genome.HOST)
+			return Result.FAIL;
+
+		this.state = State.HUMAN;
+		return Result.SUCCESS;
+	}
+
 
 
 	public void setGenome(Genome genome) {
@@ -114,12 +125,16 @@ public abstract class Player
 	public abstract void notifyOrigin(Mutation.NoResult event);
 	public abstract void notifyTarget(Mutation event);
 	public abstract void notify(Murder event);
+	public abstract void notifyOrigin(Healing.NoResult event);
+	public abstract void notifyTarget(Healing event);
 
 	public abstract void ask(Game game, ElectCaptain action);
 	public abstract void ask(Game game, MutantsActions action);
+	public abstract void ask(Game game, DoctorsAction action);
 
 	public abstract void stopAsking(ElectCaptain action);
 	public abstract void stopAsking(MutantsActions action);
+	public abstract void stopAsking(DoctorsAction action);
 
 
 
@@ -161,10 +176,14 @@ public abstract class Player
 		public void notifyOrigin(Mutation.NoResult event) { }
 		public void notifyTarget(Mutation event) { }
 		public void notify(Murder event) { }
+		public void notifyOrigin(Healing.NoResult event) { }
+		public void notifyTarget(Healing event) { }
 
 		public void ask(Game game, ElectCaptain action) { }
 		public void ask(Game game, MutantsActions action) { }
+		public void ask(Game game, DoctorsAction action) { }
 		public void stopAsking(ElectCaptain action) { }
 		public void stopAsking(MutantsActions action) { }
+		public void stopAsking(DoctorsAction action) { }
 	}
 }
