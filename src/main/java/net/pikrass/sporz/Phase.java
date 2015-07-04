@@ -10,44 +10,43 @@ public class Phase
 	private Game game;
 	private List<Action> actions;
 	private int nbDone;
-	private boolean started;
+
+	private Object mutex;
 
 	public Phase(Game game) {
 		this.game = game;
 		this.actions = new ArrayList<Action>();
-		this.started = false;
 	}
 
 	public void addAction(Action action) {
 		actions.add(action);
 	}
 
-	public void start() {
-		if(started)
-			throw new PhaseError("phase already started");
-
+	public void run() {
 		if(actions.isEmpty())
-			game.phaseEnded(this);
+			return;
 
-		started = true;
+		this.mutex = new Object();
+
 		nbDone = 0;
 
 		for(Action action : actions) {
 			Tracker tracker = new Tracker();
 			action.start(tracker);
 		}
-	}
 
-	private void end() {
-		if(!started)
-			throw new PhaseError("phase not yet started");
+		synchronized (mutex) {
+			while(nbDone != actions.size()) {
+				try {
+					mutex.wait();
+				} catch(InterruptedException e) {
+				}
+			}
+		}
 
 		for(Action action : actions) {
 			action.execute();
 		}
-
-		started = false;
-		game.phaseEnded(this);
 	}
 
 	public class Tracker {
@@ -63,12 +62,14 @@ public class Phase
 
 			state = isDone;
 
-			if(state) {
-				nbDone++;
-				if(nbDone == actions.size())
-					end();
-			} else {
-				nbDone--;
+			synchronized (mutex) {
+				if(state) {
+					nbDone++;
+					if(nbDone == actions.size())
+						mutex.notifyAll();
+				} else {
+					nbDone--;
+				}
 			}
 		}
 	}

@@ -54,12 +54,20 @@ public class Game
 
 		curPhase = new PhaseIterator(phases);
 
-		// Skip all phases but the captain one for day 0
+		started = true;
+		loop();
+	}
+
+	private void loop() {
 		Phase phase;
+
+		// Skip all phases but the captain one for day 0
 		while((phase = curPhase.next()) != this.captainPhase);
 
-		started = true;
-		phase.start();
+		while(true) {
+			phase.run();
+			phase = curPhase.next();
+		}
 	}
 
 	public void addPlayer(Player p) {
@@ -96,10 +104,6 @@ public class Game
 
 		for(Player p : players.values())
 			p.notifyRound(round, period);
-	}
-
-	public void phaseEnded(Phase p) {
-		curPhase.next().start();
 	}
 
 	private class PhaseIterator implements Iterator<Phase> {
