@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+	echo "Usage: $0 numPlayers" >> /dev/stderr
+	exit 1
+fi
+
+(
+	echo $1
+
+	for i in $(seq 1 $1); do
+		in=$(mktemp --tmpdir -u sporz-text.in.XXX)
+		out=$(mktemp --tmpdir -u sporz-text.out.XXX)
+		mkfifo -m 600 "$in"
+		mkfifo -m 600 "$out"
+		echo "$in"
+		echo "$out"
+		xterm -e "(cat < \"$out\" & cat > \"$in\")" &
+	done
+) | java -cp ./build/classes/main:./build/classes/test net.pikrass.sporz.Text >> /dev/null
+
+rm -f /tmp/sporz-text.*
