@@ -13,12 +13,16 @@ public abstract class Player
 	private State state;
 	private Genome genome;
 	private Role role;
+	private boolean paralysed;
+	private boolean alive;
 
 	public Player(String name) {
 		this.name = name;
 		this.state = State.HUMAN;
 		this.genome = Genome.STANDARD;
 		this.role = Role.ASTRONAUT;
+		this.paralysed = false;
+		this.alive = true;
 	}
 
 	public String getName() {
@@ -53,6 +57,17 @@ public abstract class Player
 		this.state = state;
 	}
 
+	public Result mutate() {
+		if(state == State.MUTANT)
+			return Result.USELESS;
+
+		if(genome == Genome.RESISTANT)
+			return Result.FAIL;
+
+		this.state = State.MUTANT;
+		return Result.SUCCESS;
+	}
+
 
 
 	public void setGenome(Genome genome) {
@@ -61,16 +76,51 @@ public abstract class Player
 
 
 
+	public void paralyse() {
+		this.paralysed = true;
+	}
+
+	public void resetParalysis() {
+		this.paralysed = false;
+	}
+
+	public boolean isParalysed() {
+		return paralysed;
+	}
+
+
+
+	public boolean isAlive() {
+		return alive;
+	}
+
+	public void kill() {
+		this.alive = false;
+	}
+
+
+
 	public boolean isNobody() {
 		return false;
 	}
 
+
+
 	public abstract void notifyRound(int num, RoundPeriod period);
 	public abstract void notify(Attribution event);
 	public abstract void notify(NewCaptain event);
+	public abstract void notifyOrigin(Paralysis event);
+	public abstract void notifyTarget(Paralysis event);
+	public abstract void notifyOrigin(Mutation.NoResult event);
+	public abstract void notifyTarget(Mutation event);
+	public abstract void notify(Murder event);
 
 	public abstract void ask(Game game, ElectCaptain action);
+	public abstract void ask(Game game, MutantsActions action);
+
 	public abstract void stopAsking(ElectCaptain action);
+	public abstract void stopAsking(MutantsActions action);
+
 
 
 	@Override
@@ -100,11 +150,21 @@ public abstract class Player
 			return true;
 		}
 
+		public void paralyse() { }
+		public Result mutate() { return Result.USELESS; }
+
 		public void notifyRound(int num, RoundPeriod period) { }
 		public void notify(Attribution event) { }
 		public void notify(NewCaptain event) { }
+		public void notifyOrigin(Paralysis event) { }
+		public void notifyTarget(Paralysis event) { }
+		public void notifyOrigin(Mutation.NoResult event) { }
+		public void notifyTarget(Mutation event) { }
+		public void notify(Murder event) { }
 
 		public void ask(Game game, ElectCaptain action) { }
+		public void ask(Game game, MutantsActions action) { }
 		public void stopAsking(ElectCaptain action) { }
+		public void stopAsking(MutantsActions action) { }
 	}
 }

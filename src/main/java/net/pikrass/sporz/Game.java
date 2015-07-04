@@ -2,6 +2,8 @@ package net.pikrass.sporz;
 
 import net.pikrass.sporz.actions.SwitchPeriod;
 import net.pikrass.sporz.actions.ElectCaptain;
+import net.pikrass.sporz.actions.MutantsActions;
+import net.pikrass.sporz.actions.ResetParalysis;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,7 +50,9 @@ public class Game
 
 	public void start() {
 		mutantsPhase.addAction(new SwitchPeriod(this));
+		mutantsPhase.addAction(new MutantsActions(this));
 		dayPhase.addAction(new SwitchPeriod(this));
+		dayPhase.addAction(new ResetParalysis(this));
 		dayPhase.addAction(new ElectCaptain(this));
 		captainPhase.addAction(new ElectCaptain(this));
 
@@ -96,6 +100,12 @@ public class Game
 	public void setCaptain(Player player) {
 		this.captain = player;
 	}
+
+	public void kill(Player player) {
+		this.players.remove(player.getName());
+		player.kill();
+	}
+
 
 	public void nextPeriod() {
 		if(period == RoundPeriod.NIGHT) {
