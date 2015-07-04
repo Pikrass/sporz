@@ -61,6 +61,9 @@ public class Game
 	private void loop() {
 		Phase phase;
 
+		// Go into DAY 0
+		nextPeriod();
+
 		// Skip all phases but the captain one for day 0
 		while((phase = curPhase.next()) != this.captainPhase);
 
