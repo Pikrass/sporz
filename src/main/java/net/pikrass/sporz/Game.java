@@ -1,5 +1,6 @@
 package net.pikrass.sporz;
 
+import net.pikrass.sporz.actions.Action;
 import net.pikrass.sporz.actions.SwitchPeriod;
 import net.pikrass.sporz.actions.ElectCaptain;
 import net.pikrass.sporz.actions.MutantsActions;
@@ -77,6 +78,10 @@ public class Game
 			phase.run();
 			phase = curPhase.next();
 		}
+	}
+
+	public void addInfoAction(Action a) {
+		infoPhase.addAction(a);
 	}
 
 	public void addPlayer(Player p) {

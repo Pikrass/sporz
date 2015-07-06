@@ -1,5 +1,9 @@
 package net.pikrass.sporz;
 
+import net.pikrass.sporz.actions.Psychoanalyse;
+import net.pikrass.sporz.actions.Sequence;
+import net.pikrass.sporz.actions.Count;
+
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
@@ -62,6 +66,9 @@ public class StandardRules extends Rules {
 		eng.notify(eng.makeAttribution());
 		hac.notify(hac.makeAttribution());
 		spy.notify(spy.makeAttribution());
+		game.addInfoAction(new Psychoanalyse(game, psy));
+		game.addInfoAction(new Sequence(game, gen));
+		game.addInfoAction(new Count(game, eng));
 
 		// If there are enough players, let's add a traitor
 		if(rem > 0) {

@@ -162,6 +162,51 @@ public class TextPlayer extends Player
 		}
 	}
 
+	@Override
+	public void notify(Psychoanalysis event) {
+		if(!event.hasResult()) {
+			out.println("You didn't psychanalyse anybody");
+			return;
+		}
+
+		switch(event.getResult()) {
+			case HUMAN:
+				out.println(event.getTarget()+" is human"); break;
+			case MUTANT:
+				out.println(event.getTarget()+" is mutant"); break;
+		}
+	}
+
+	@Override
+	public void notify(Sequencing event) {
+		if(!event.hasResult()) {
+			out.println("You didn't sequence someone's genome");
+			return;
+		}
+
+		switch(event.getResult()) {
+			case STANDARD:
+				out.println(event.getTarget()+" is standard"); break;
+			case HOST:
+				out.println(event.getTarget()+" is host"); break;
+			case RESISTANT:
+				out.println(event.getTarget()+" is resistant"); break;
+		}
+	}
+
+	@Override
+	public void notify(MutantCount event) {
+		if(!event.hasResult()) {
+			out.println("You didn't count the mutants");
+			return;
+		}
+
+		if(event.getResult() <= 1)
+			out.println("There is "+event.getResult()+" mutant");
+		else
+			out.println("There are "+event.getResult()+" mutants");
+	}
+
 
 	@Override
 	public void ask(final Game game, final ElectCaptain action) {
@@ -313,6 +358,125 @@ public class TextPlayer extends Player
 	}
 
 	@Override
+	public void ask(final Game game, final Psychoanalyse action) {
+		this.sink = (new Thread() {
+			@Override
+			public void run() {
+				out.println("You can choose someone to psychanalyse");
+
+				while(true) {
+					out.print("> ");
+
+					String nick = null;
+					synchronized (line) {
+						try {
+							line.wait();
+						} catch(InterruptedException e) {
+							return;
+						}
+						nick = line.toString();
+					}
+
+					Player p = null;
+					if(nick.equals("nobody"))
+						p = Player.NOBODY;
+					else
+						p = game.getPlayer(nick);
+
+					if(p == null) {
+						out.println("This player doesn't exist!");
+						continue;
+					}
+
+					action.choose(TextPlayer.this, action.new Do(p));
+					out.println("OK. You can change your choice until the end of the phase.");
+				}
+			}
+		});
+
+		this.sink.start();
+	}
+
+	@Override
+	public void ask(final Game game, final Sequence action) {
+		this.sink = (new Thread() {
+			@Override
+			public void run() {
+				out.println("You can choose someone whose genome to sequence");
+
+				while(true) {
+					out.print("> ");
+
+					String nick = null;
+					synchronized (line) {
+						try {
+							line.wait();
+						} catch(InterruptedException e) {
+							return;
+						}
+						nick = line.toString();
+					}
+
+					Player p = null;
+					if(nick.equals("nobody"))
+						p = Player.NOBODY;
+					else
+						p = game.getPlayer(nick);
+
+					if(p == null) {
+						out.println("This player doesn't exist!");
+						continue;
+					}
+
+					action.choose(TextPlayer.this, action.new Do(p));
+					out.println("OK. You can change your choice until the end of the phase.");
+				}
+			}
+		});
+
+		this.sink.start();
+	}
+
+	@Override
+	public void ask(final Game game, final Count action) {
+		this.sink = (new Thread() {
+			@Override
+			public void run() {
+				out.println("Do you want to count the mutants ?");
+
+				while(true) {
+					out.print("> ");
+
+					String res = null;
+					synchronized (line) {
+						try {
+							line.wait();
+						} catch(InterruptedException e) {
+							return;
+						}
+						res = line.toString();
+					}
+
+					boolean choice;
+					if(res.equals("yes")) {
+						choice = true;
+					} else if(res.equals("no")) {
+						choice = false;
+					} else {
+						out.println("Type yes or no");
+						continue;
+					}
+
+					action.choose(TextPlayer.this, action.new Do(choice));
+					out.println("OK. You can change your vote until the end of the election.");
+				}
+			}
+		});
+
+		this.sink.start();
+	}
+
+	@Override
 	public void stopAsking(ElectCaptain action) {
 		this.sink.interrupt();
 	}
@@ -324,6 +488,21 @@ public class TextPlayer extends Player
 
 	@Override
 	public void stopAsking(DoctorsAction action) {
+		this.sink.interrupt();
+	}
+
+	@Override
+	public void stopAsking(Psychoanalyse action) {
+		this.sink.interrupt();
+	}
+
+	@Override
+	public void stopAsking(Sequence action) {
+		this.sink.interrupt();
+	}
+
+	@Override
+	public void stopAsking(Count action) {
 		this.sink.interrupt();
 	}
 }
