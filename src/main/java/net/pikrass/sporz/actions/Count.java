@@ -5,7 +5,7 @@ import net.pikrass.sporz.events.MutantCount;
 
 import java.util.Iterator;
 
-public class Count extends PlayerAction<Count.Do> {
+public class Count extends PlayerAction<Count.Do> implements Hackable {
 	private Do choice;
 	private Player engineer;
 
@@ -40,25 +40,47 @@ public class Count extends PlayerAction<Count.Do> {
 	}
 
 
+	@Override
+	public boolean isStillValid() {
+		return engineer.isAlive();
+	}
+
+	@Override
+	public void hack(Game game, Player hacker) {
+		Do choice = this.choice;
+
+		// Pretend we purposedly did nothing
+		if(choice == null)
+			choice = new Do(false);
+
+		choice.hack(game, hacker);
+	}
+
+
 	public class Do extends RunnableChoice {
-		private boolean count;
+		private MutantCount event;
+
 		public Do(boolean count) {
-			this.count = count;
+			if(count) {
+				int num = 0;
+				for(Iterator<Player> it = game.playerIterator() ; it.hasNext() ; ) {
+					if(it.next().getState() == State.MUTANT)
+						num++;
+				}
+
+				this.event = new MutantCount(engineer, num);
+			} else {
+				this.event = new MutantCount(engineer);
+			}
 		}
 
 		@Override
 		public void run(Game game) {
-			if(!count)
-				return;
-
-			int num = 0;
-			for(Iterator<Player> it = game.playerIterator() ; it.hasNext() ; ) {
-				if(it.next().getState() == State.MUTANT)
-					num++;
-			}
-
-			MutantCount event = new MutantCount(engineer, num);
 			engineer.notify(event);
+		}
+
+		public void hack(Game game, Player hacker) {
+			hacker.notify(event.getHacked());
 		}
 	}
 }

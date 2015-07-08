@@ -207,6 +207,51 @@ public class TextPlayer extends Player
 			out.println("There are "+event.getResult()+" mutants");
 	}
 
+	@Override
+	public void notify(Psychoanalysis.Hacked event) {
+		if(!event.hasResult()) {
+			out.println("The psychologist saw nothing");
+			return;
+		}
+
+		switch(event.getResult()) {
+			case HUMAN:
+				out.println("The psychologist saw: \""+event.getTarget()+" is human\""); break;
+			case MUTANT:
+				out.println("The psychologist saw: \""+event.getTarget()+" is mutant\""); break;
+		}
+	}
+
+	@Override
+	public void notify(Sequencing.Hacked event) {
+		if(!event.hasResult()) {
+			out.println("The geneticist saw nothing");
+			return;
+		}
+
+		switch(event.getResult()) {
+			case STANDARD:
+				out.println("The geneticist saw: \""+event.getTarget()+" is standard\""); break;
+			case HOST:
+				out.println("The geneticist saw: \""+event.getTarget()+" is host\""); break;
+			case RESISTANT:
+				out.println("The geneticist saw: \""+event.getTarget()+" is resistant\""); break;
+		}
+	}
+
+	@Override
+	public void notify(MutantCount.Hacked event) {
+		if(!event.hasResult()) {
+			out.println("The computer engineer saw nothing");
+			return;
+		}
+
+		if(event.getResult() <= 1)
+			out.println("The computer engineer saw: \"there is "+event.getResult()+" mutant\"");
+		else
+			out.println("The computer engineer saw: \"there are "+event.getResult()+" mutants\"");
+	}
+
 
 	@Override
 	public void ask(final Game game, final ElectCaptain action) {
@@ -477,6 +522,51 @@ public class TextPlayer extends Player
 	}
 
 	@Override
+	public void ask(final Game game, final Hack action) {
+		this.sink = (new Thread() {
+			@Override
+			public void run() {
+				out.println("What role do you want to hack?");
+
+				while(true) {
+					out.print("> ");
+
+					String res = null;
+					synchronized (line) {
+						try {
+							line.wait();
+						} catch(InterruptedException e) {
+							return;
+						}
+						res = line.toString();
+					}
+
+					String choice;
+					if(res.equals("psy")) {
+						choice = "p1";
+					} else if(res.equals("genet")) {
+						choice = "g1";
+					} else if(res.equals("engineer")) {
+						choice = "c1";
+					} else {
+						out.println("Type psy, genet or engineer");
+						continue;
+					}
+
+					try {
+						action.choose(TextPlayer.this, action.new Do(choice));
+						out.println("OK. You can change your vote until the end of the election.");
+					} catch(InvalidChoiceException e) {
+						out.println("You hacked this role last night, please choose another one.");
+					}
+				}
+			}
+		});
+
+		this.sink.start();
+	}
+
+	@Override
 	public void stopAsking(ElectCaptain action) {
 		this.sink.interrupt();
 	}
@@ -503,6 +593,11 @@ public class TextPlayer extends Player
 
 	@Override
 	public void stopAsking(Count action) {
+		this.sink.interrupt();
+	}
+
+	@Override
+	public void stopAsking(Hack action) {
 		this.sink.interrupt();
 	}
 }

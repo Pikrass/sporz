@@ -3,7 +3,8 @@ package net.pikrass.sporz.actions;
 import net.pikrass.sporz.*;
 import net.pikrass.sporz.events.Psychoanalysis;
 
-public class Psychoanalyse extends PlayerAction<Psychoanalyse.Do> {
+public class Psychoanalyse extends PlayerAction<Psychoanalyse.Do> implements Hackable
+{
 	private Do choice;
 	private Player psy;
 
@@ -38,16 +39,39 @@ public class Psychoanalyse extends PlayerAction<Psychoanalyse.Do> {
 	}
 
 
+	@Override
+	public boolean isStillValid() {
+		return psy.isAlive();
+	}
+
+	@Override
+	public void hack(Game game, Player hacker) {
+		Do choice = this.choice;
+
+		// Pretend we purposedly did nothing
+		if(choice == null)
+			choice = new Do(Player.NOBODY);
+
+		choice.hack(game, hacker);
+	}
+
+
 	public class Do extends RunnableChoice {
 		private Player target;
+		private Psychoanalysis event;
+
 		public Do(Player target) {
 			this.target = target;
+			this.event = new Psychoanalysis(psy, target);
 		}
 
 		@Override
 		public void run(Game game) {
-			Psychoanalysis event = new Psychoanalysis(psy, target);
 			psy.notify(event);
+		}
+
+		public void hack(Game game, Player hacker) {
+			hacker.notify(event.getHacked());
 		}
 	}
 }

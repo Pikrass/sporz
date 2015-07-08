@@ -3,6 +3,7 @@ package net.pikrass.sporz;
 import net.pikrass.sporz.actions.Psychoanalyse;
 import net.pikrass.sporz.actions.Sequence;
 import net.pikrass.sporz.actions.Count;
+import net.pikrass.sporz.actions.Hack;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -66,9 +67,19 @@ public class StandardRules extends Rules {
 		eng.notify(eng.makeAttribution());
 		hac.notify(hac.makeAttribution());
 		spy.notify(spy.makeAttribution());
-		game.addInfoAction(new Psychoanalyse(game, psy));
-		game.addInfoAction(new Sequence(game, gen));
-		game.addInfoAction(new Count(game, eng));
+
+		Psychoanalyse psyAction = new Psychoanalyse(game, psy);
+		Sequence genAction = new Sequence(game, gen);
+		Count engAction = new Count(game, eng);
+		Hack hacktion = new Hack(game, hac);
+		hacktion.addChoice("p1", psyAction);
+		hacktion.addChoice("g1", genAction);
+		hacktion.addChoice("c1", engAction);
+
+		game.addInfoAction(psyAction);
+		game.addInfoAction(genAction);
+		game.addInfoAction(engAction);
+		game.addInfoAction(hacktion);
 
 		// If there are enough players, let's add a traitor
 		if(rem > 0) {
