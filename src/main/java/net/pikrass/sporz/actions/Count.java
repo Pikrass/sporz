@@ -6,11 +6,13 @@ import net.pikrass.sporz.events.MutantCount;
 import java.util.Iterator;
 
 public class Count extends PlayerAction<Count.Do> implements Hackable {
+	private String name;
 	private Do choice;
 	private Player engineer;
 
-	public Count(Game game, Player engineer) {
+	public Count(String name, Game game, Player engineer) {
 		super(game);
+		this.name = name;
 		this.engineer = engineer;
 	}
 
@@ -39,6 +41,11 @@ public class Count extends PlayerAction<Count.Do> implements Hackable {
 		choice.run(game);
 	}
 
+
+	@Override
+	public String getName() {
+		return name;
+	}
 
 	@Override
 	public boolean isStillValid() {

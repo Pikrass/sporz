@@ -68,13 +68,13 @@ public class StandardRules extends Rules {
 		hac.notify(hac.makeAttribution());
 		spy.notify(spy.makeAttribution());
 
-		Psychoanalyse psyAction = new Psychoanalyse(game, psy);
-		Sequence genAction = new Sequence(game, gen);
-		Count engAction = new Count(game, eng);
+		Psychoanalyse psyAction = new Psychoanalyse("p1", game, psy);
+		Sequence genAction = new Sequence("g1", game, gen);
+		Count engAction = new Count("c1", game, eng);
 		Hack hacktion = new Hack(game, hac);
-		hacktion.addChoice("p1", psyAction);
-		hacktion.addChoice("g1", genAction);
-		hacktion.addChoice("c1", engAction);
+		hacktion.addChoice(psyAction);
+		hacktion.addChoice(genAction);
+		hacktion.addChoice(engAction);
 
 		game.addInfoAction(psyAction);
 		game.addInfoAction(genAction);

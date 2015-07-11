@@ -5,11 +5,13 @@ import net.pikrass.sporz.events.Psychoanalysis;
 
 public class Psychoanalyse extends PlayerAction<Psychoanalyse.Do> implements Hackable
 {
+	private String name;
 	private Do choice;
 	private Player psy;
 
-	public Psychoanalyse(Game game, Player psy) {
+	public Psychoanalyse(String name, Game game, Player psy) {
 		super(game);
+		this.name = name;
 		this.psy = psy;
 	}
 
@@ -38,6 +40,11 @@ public class Psychoanalyse extends PlayerAction<Psychoanalyse.Do> implements Hac
 		choice.run(game);
 	}
 
+
+	@Override
+	public String getName() {
+		return name;
+	}
 
 	@Override
 	public boolean isStillValid() {

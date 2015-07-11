@@ -21,8 +21,8 @@ public class Hack extends PlayerAction<Hack.Do>
 		this.lastChoice = null;
 	}
 
-	public void addChoice(String label, Hackable action) {
-		possibleChoices.put(label, action);
+	public void addChoice(Hackable action) {
+		possibleChoices.put(action.getName(), action);
 	}
 
 	public Set<String> getChoices() {

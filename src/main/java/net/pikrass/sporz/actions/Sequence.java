@@ -5,11 +5,13 @@ import net.pikrass.sporz.events.Sequencing;
 
 public class Sequence extends PlayerAction<Sequence.Do> implements Hackable
 {
+	private String name;
 	private Do choice;
 	private Player genet;
 
-	public Sequence(Game game, Player genet) {
+	public Sequence(String name, Game game, Player genet) {
 		super(game);
+		this.name = name;
 		this.genet = genet;
 	}
 
@@ -38,6 +40,11 @@ public class Sequence extends PlayerAction<Sequence.Do> implements Hackable
 		choice.run(game);
 	}
 
+
+	@Override
+	public String getName() {
+		return name;
+	}
 
 	@Override
 	public boolean isStillValid() {
