@@ -3,12 +3,14 @@ package net.pikrass.sporz.actions;
 import net.pikrass.sporz.*;
 import net.pikrass.sporz.events.Murder;
 import net.pikrass.sporz.events.Healing;
+import net.pikrass.sporz.events.SpyReport;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 public class DoctorsAction extends PlayerAction<DoctorsAction.DoctorChoice>
+	implements Spyable
 {
 	private List<DoctorChoice> choices;
 	private List<Player> doctors;
@@ -56,7 +58,15 @@ public class DoctorsAction extends PlayerAction<DoctorsAction.DoctorChoice>
 	}
 
 
-	public abstract class DoctorChoice extends RunnableChoice {
+	@Override
+	public void spy(Player target, SpyReport report) {
+		for(DoctorChoice choice : choices)
+			choice.spy(target, report);
+	}
+
+
+	public abstract class DoctorChoice extends RunnableChoice
+			implements Spyable {
 		public abstract int getAvailable();
 	}
 
@@ -79,6 +89,10 @@ public class DoctorsAction extends PlayerAction<DoctorsAction.DoctorChoice>
 
 			game.kill(target);
 		}
+
+		@Override
+		public void spy(Player target, SpyReport report) {
+		}
 	}
 
 	public class Heal extends DoctorChoice {
@@ -100,6 +114,12 @@ public class DoctorsAction extends PlayerAction<DoctorsAction.DoctorChoice>
 			target.notifyTarget(event);
 			for(Player doc : doctors)
 				doc.notifyOrigin(event.getNoResult());
+		}
+
+		@Override
+		public void spy(Player target, SpyReport report) {
+			if(this.target.equals(target))
+				report.addLine(report.new Line(SpyReport.LineType.HEALING));
 		}
 	}
 }

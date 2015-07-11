@@ -27,6 +27,9 @@ public class Game
 	private Phase captainPhase, mutantsPhase, doctorsPhase, infoPhase, dayPhase;
 	private PhaseIterator curPhase;
 
+	private MutantsActions mutantsActions;
+	private DoctorsAction doctorsAction;
+
 	public Game() {
 		this.started = false;
 
@@ -48,17 +51,20 @@ public class Game
 		this.phases.add(infoPhase);
 		this.phases.add(dayPhase);
 		this.phases.add(captainPhase);
-	}
 
-	public void start() {
+		this.mutantsActions = new MutantsActions(this);
+		this.doctorsAction = new DoctorsAction(this);
+
 		mutantsPhase.addAction(new SwitchPeriod(this));
-		mutantsPhase.addAction(new MutantsActions(this));
-		doctorsPhase.addAction(new DoctorsAction(this));
+		mutantsPhase.addAction(this.mutantsActions);
+		doctorsPhase.addAction(this.doctorsAction);
 		dayPhase.addAction(new SwitchPeriod(this));
 		dayPhase.addAction(new ResetParalysis(this));
 		dayPhase.addAction(new ElectCaptain(this));
 		captainPhase.addAction(new ElectCaptain(this));
+	}
 
+	public void start() {
 		curPhase = new PhaseIterator(phases);
 
 		started = true;
@@ -82,6 +88,14 @@ public class Game
 
 	public void addInfoAction(Action a) {
 		infoPhase.addAction(a);
+	}
+
+	public MutantsActions getMutantsActions() {
+		return mutantsActions;
+	}
+
+	public DoctorsAction getDoctorsAction() {
+		return doctorsAction;
 	}
 
 	public void addPlayer(Player p) {

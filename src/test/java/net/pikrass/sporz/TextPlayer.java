@@ -252,6 +252,28 @@ public class TextPlayer extends Player
 			out.println("The computer engineer saw: \"there are "+event.getResult()+" mutants\"");
 	}
 
+	@Override
+	public void notify(SpyReport event) {
+		StringBuffer actions = new StringBuffer();
+
+		for(SpyReport.Line line : event.getResult()) {
+			switch(line.getType()) {
+				case MUTATION:       actions.append("mutated, ");        break;
+				case PARALYSIS:      actions.append("paralysed, ");      break;
+				case HEALING:        actions.append("healed, ");         break;
+				case PSYCHOANALYSIS: actions.append("psychoanalysed, "); break;
+				case SEQUENCING:     actions.append("sequenced, ");      break;
+			}
+		}
+
+		if(actions.length() == 0) {
+			out.println("Nothing happened to "+event.getTarget()+" tonight");
+		} else {
+			actions.delete(actions.length()-2, actions.length());
+			out.println(event.getTarget().toString()+" has been "+actions+" tonight");
+		}
+	}
+
 
 	@Override
 	public void ask(final Game game, final ElectCaptain action) {
@@ -569,6 +591,46 @@ public class TextPlayer extends Player
 	}
 
 	@Override
+	public void ask(final Game game, final Spy action) {
+		this.sink = (new Thread() {
+			@Override
+			public void run() {
+				out.println("You can choose someone to spy on");
+
+				while(true) {
+					out.print("> ");
+
+					String nick = null;
+					synchronized (line) {
+						try {
+							line.wait();
+						} catch(InterruptedException e) {
+							return;
+						}
+						nick = line.toString();
+					}
+
+					Player p = null;
+					if(nick.equals("nobody"))
+						p = Player.NOBODY;
+					else
+						p = game.getPlayer(nick);
+
+					if(p == null) {
+						out.println("This player doesn't exist!");
+						continue;
+					}
+
+					action.choose(TextPlayer.this, action.new Do(p));
+					out.println("OK. You can change your choice until the end of the phase.");
+				}
+			}
+		});
+
+		this.sink.start();
+	}
+
+	@Override
 	public void stopAsking(ElectCaptain action) {
 		this.sink.interrupt();
 	}
@@ -600,6 +662,11 @@ public class TextPlayer extends Player
 
 	@Override
 	public void stopAsking(Hack action) {
+		this.sink.interrupt();
+	}
+
+	@Override
+	public void stopAsking(Spy action) {
 		this.sink.interrupt();
 	}
 }

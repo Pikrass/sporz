@@ -4,12 +4,14 @@ import net.pikrass.sporz.*;
 import net.pikrass.sporz.events.Paralysis;
 import net.pikrass.sporz.events.Mutation;
 import net.pikrass.sporz.events.Murder;
+import net.pikrass.sporz.events.SpyReport;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 public class MutantsActions extends PlayerAction<MutantsActions.MutantChoice>
+	implements Spyable
 {
 	private enum ChoiceType {
 		MUTATE_OR_KILL, PARALYSE
@@ -62,7 +64,17 @@ public class MutantsActions extends PlayerAction<MutantsActions.MutantChoice>
 	}
 
 
-	public abstract class MutantChoice extends RunnableChoice {
+	@Override
+	public void spy(Player target, SpyReport report) {
+		if(choice1 != null)
+			choice1.spy(target, report);
+		if(choice2 != null)
+			choice2.spy(target, report);
+	}
+
+
+	public abstract class MutantChoice extends RunnableChoice
+			implements Spyable {
 		public abstract ChoiceType getType();
 	}
 
@@ -84,6 +96,10 @@ public class MutantsActions extends PlayerAction<MutantsActions.MutantChoice>
 				it.next().notify(event);
 
 			game.kill(target);
+		}
+
+		@Override
+		public void spy(Player target, SpyReport report) {
 		}
 	}
 
@@ -107,6 +123,12 @@ public class MutantsActions extends PlayerAction<MutantsActions.MutantChoice>
 			for(Player mutant : mutants)
 				mutant.notifyOrigin(event.getNoResult());
 		}
+
+		@Override
+		public void spy(Player target, SpyReport report) {
+			if(this.target.equals(target))
+				report.addLine(report.new Line(SpyReport.LineType.MUTATION));
+		}
 	}
 
 	public class Paralyse extends MutantChoice {
@@ -128,6 +150,12 @@ public class MutantsActions extends PlayerAction<MutantsActions.MutantChoice>
 			target.notifyTarget(event);
 			for(Player mutant : mutants)
 				mutant.notifyOrigin(event);
+		}
+
+		@Override
+		public void spy(Player target, SpyReport report) {
+			if(this.target.equals(target))
+				report.addLine(report.new Line(SpyReport.LineType.PARALYSIS));
 		}
 	}
 }

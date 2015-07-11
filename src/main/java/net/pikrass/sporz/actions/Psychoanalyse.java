@@ -2,8 +2,10 @@ package net.pikrass.sporz.actions;
 
 import net.pikrass.sporz.*;
 import net.pikrass.sporz.events.Psychoanalysis;
+import net.pikrass.sporz.events.SpyReport;
 
-public class Psychoanalyse extends PlayerAction<Psychoanalyse.Do> implements Hackable
+public class Psychoanalyse extends PlayerAction<Psychoanalyse.Do>
+	implements Hackable, Spyable
 {
 	private String name;
 	private Do choice;
@@ -62,6 +64,12 @@ public class Psychoanalyse extends PlayerAction<Psychoanalyse.Do> implements Hac
 		choice.hack(game, hacker);
 	}
 
+	@Override
+	public void spy(Player target, SpyReport report) {
+		if(choice != null)
+			choice.spy(target, report);
+	}
+
 
 	public class Do extends RunnableChoice {
 		private Player target;
@@ -79,6 +87,14 @@ public class Psychoanalyse extends PlayerAction<Psychoanalyse.Do> implements Hac
 
 		public void hack(Game game, Player hacker) {
 			hacker.notify(event.getHacked());
+		}
+
+		public void spy(Player target, SpyReport report) {
+			if(this.target.equals(target))
+				report.addLine(report.new Line(
+							SpyReport.LineType.PSYCHOANALYSIS,
+							getName()
+							));
 		}
 	}
 }
