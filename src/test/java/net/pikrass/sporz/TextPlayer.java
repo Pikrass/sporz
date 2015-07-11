@@ -548,8 +548,10 @@ public class TextPlayer extends Player
 						choice = "g1";
 					} else if(res.equals("engineer")) {
 						choice = "c1";
+					} else if(res.equals("nothing")) {
+						choice = null;
 					} else {
-						out.println("Type psy, genet or engineer");
+						out.println("Type psy, genet, engineer or nothing");
 						continue;
 					}
 
