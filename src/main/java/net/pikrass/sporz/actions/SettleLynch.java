@@ -55,6 +55,8 @@ public class SettleLynch extends PlayerAction<SettleLynch.Do>
 		public void run(Game game) {
 			LynchSettling event = new LynchSettling(game.getCaptain(), target);
 
+			game.getMaster().notify(event);
+
 			for(Iterator<Player> it = game.playerIterator() ; it.hasNext() ; )
 				it.next().notify(event);
 

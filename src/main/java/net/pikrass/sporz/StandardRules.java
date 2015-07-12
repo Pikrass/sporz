@@ -5,6 +5,7 @@ import net.pikrass.sporz.actions.Sequence;
 import net.pikrass.sporz.actions.Count;
 import net.pikrass.sporz.actions.Hack;
 import net.pikrass.sporz.actions.Spy;
+import net.pikrass.sporz.events.Attribution;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -32,7 +33,9 @@ public class StandardRules extends Rules {
 		Player mutant = players.remove((int)Math.floor(Math.random()*rem--));
 		mutant.setState(State.MUTANT);
 		mutant.setGenome(Genome.HOST);
-		mutant.notify(mutant.makeAttribution());
+		Attribution mutA = mutant.makeAttribution();
+		game.getMaster().notify(mutA);
+		mutant.notify(mutA);
 
 		// Doctors
 		List<Player> docs = new LinkedList<Player>();
@@ -40,7 +43,9 @@ public class StandardRules extends Rules {
 		docs.add(players.remove((int)Math.floor(Math.random()*rem--)));
 		for(Player doc : docs) {
 			doc.setRole(Role.DOCTOR);
-			doc.notify(doc.makeAttribution(docs));
+			Attribution a = doc.makeAttribution(docs);
+			game.getMaster().notify(a);
+			doc.notify(a);
 		}
 
 		// Additionnal host and resistant
@@ -63,11 +68,24 @@ public class StandardRules extends Rules {
 		eng.setRole(Role.COMPUTER_ENGINEER);
 		hac.setRole(Role.HACKER);
 		spy.setRole(Role.SPY);
-		psy.notify(psy.makeAttribution());
-		gen.notify(gen.makeAttribution());
-		eng.notify(eng.makeAttribution());
-		hac.notify(hac.makeAttribution());
-		spy.notify(spy.makeAttribution());
+
+		Attribution psyA = psy.makeAttribution(),
+					genA = gen.makeAttribution(),
+					engA = eng.makeAttribution(),
+					hacA = hac.makeAttribution(),
+					spyA = spy.makeAttribution();
+
+		game.getMaster().notify(psyA);
+		game.getMaster().notify(genA);
+		game.getMaster().notify(engA);
+		game.getMaster().notify(hacA);
+		game.getMaster().notify(spyA);
+
+		psy.notify(psyA);
+		gen.notify(genA);
+		eng.notify(engA);
+		hac.notify(hacA);
+		spy.notify(spyA);
 
 		Psychoanalyse psyAction = new Psychoanalyse("p1", game, psy);
 		Sequence genAction = new Sequence("g1", game, gen);
@@ -94,11 +112,16 @@ public class StandardRules extends Rules {
 		if(rem > 0) {
 			Player traitor = players.remove((int)Math.floor(Math.random()*rem--));
 			traitor.setRole(Role.TRAITOR);
-			traitor.notify(traitor.makeAttribution());
+			Attribution a = traitor.makeAttribution();
+			game.getMaster().notify(a);
+			traitor.notify(a);
 		}
 
 		// Notify the others about their attribution
-		for(Player p : players)
-			p.notify(p.makeAttribution());
+		for(Player p : players) {
+			Attribution a = p.makeAttribution();
+			game.getMaster().notify(a);
+			p.notify(a);
+		}
 	}
 }

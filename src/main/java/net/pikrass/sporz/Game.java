@@ -33,6 +33,8 @@ public class Game
 	private MutantsActions mutantsActions;
 	private DoctorsAction doctorsAction;
 
+	private Master master;
+
 	public Game() {
 		this.started = false;
 
@@ -41,6 +43,8 @@ public class Game
 
 		this.round = 0;
 		this.period = RoundPeriod.NIGHT;
+
+		this.master = new UselessMaster();
 
 		this.captainPhase = new Phase(this);
 		this.mutantsPhase = new Phase(this);
@@ -108,6 +112,16 @@ public class Game
 		return doctorsAction;
 	}
 
+	public void setMaster(Master master) {
+		if(master == null)
+			master = new UselessMaster();
+		this.master = master;
+	}
+
+	public Master getMaster() {
+		return master;
+	}
+
 	public void addPlayer(Player p) {
 		players.put(p.getName(), p);
 	}
@@ -145,6 +159,8 @@ public class Game
 			period = RoundPeriod.NIGHT;
 			round++;
 		}
+
+		master.notifyRound(round, period);
 
 		for(Player p : players.values())
 			p.notifyRound(round, period);

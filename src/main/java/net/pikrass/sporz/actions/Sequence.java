@@ -82,10 +82,12 @@ public class Sequence extends PlayerAction<Sequence.Do>
 
 		@Override
 		public void run(Game game) {
+			game.getMaster().notify(event);
 			genet.notify(event);
 		}
 
 		public void hack(Game game, Player hacker) {
+			game.getMaster().notify(event.getHacked());
 			hacker.notify(event.getHacked());
 		}
 

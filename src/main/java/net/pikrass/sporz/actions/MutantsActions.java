@@ -92,6 +92,9 @@ public class MutantsActions extends PlayerAction<MutantsActions.MutantChoice>
 		@Override
 		public void run(Game game) {
 			Murder event = new Murder(Murder.Origin.MUTANTS, target);
+
+			game.getMaster().notify(event);
+
 			for(Iterator<Player> it = game.playerIterator() ; it.hasNext() ; )
 				it.next().notify(event);
 
@@ -119,7 +122,10 @@ public class MutantsActions extends PlayerAction<MutantsActions.MutantChoice>
 			Result res = target.mutate();
 
 			Mutation event = new Mutation(target, res);
+
+			game.getMaster().notify(event);
 			target.notifyTarget(event);
+
 			for(Player mutant : mutants)
 				mutant.notifyOrigin(event.getNoResult());
 		}
@@ -147,7 +153,10 @@ public class MutantsActions extends PlayerAction<MutantsActions.MutantChoice>
 			target.paralyse();
 
 			Paralysis event = new Paralysis(target);
+
+			game.getMaster().notify(event);
 			target.notifyTarget(event);
+
 			for(Player mutant : mutants)
 				mutant.notifyOrigin(event);
 		}

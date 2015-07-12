@@ -55,6 +55,7 @@ public class Lynch extends PlayerAction<Lynch.Vote>
 
 		Lynching event = new Lynching(votes, winners);
 
+		game.getMaster().notify(event);
 		for(Iterator<Player> it = game.playerIterator() ; it.hasNext() ; )
 			it.next().notify(event.getAnonymous());
 

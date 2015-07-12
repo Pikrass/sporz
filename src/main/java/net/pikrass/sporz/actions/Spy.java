@@ -62,6 +62,7 @@ public class Spy extends PlayerAction<Spy.Do>
 			for(Spyable action : actions)
 				action.spy(target, event);
 
+			game.getMaster().notify(event);
 			spy.notify(event);
 		}
 	}

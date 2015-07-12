@@ -84,6 +84,9 @@ public class DoctorsAction extends PlayerAction<DoctorsAction.DoctorChoice>
 		@Override
 		public void run(Game game) {
 			Murder event = new Murder(Murder.Origin.DOCTORS, target);
+
+			game.getMaster().notify(event);
+
 			for(Iterator<Player> it = game.playerIterator() ; it.hasNext() ; )
 				it.next().notify(event);
 
@@ -111,7 +114,10 @@ public class DoctorsAction extends PlayerAction<DoctorsAction.DoctorChoice>
 			Result res = target.heal();
 
 			Healing event = new Healing(target, res);
+
+			game.getMaster().notify(event);
 			target.notifyTarget(event);
+
 			for(Player doc : doctors)
 				doc.notifyOrigin(event.getNoResult());
 		}

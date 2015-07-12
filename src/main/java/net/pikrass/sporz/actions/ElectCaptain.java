@@ -57,6 +57,7 @@ public class ElectCaptain extends PlayerAction<ElectCaptain.Vote>
 
 		NewCaptain event = new NewCaptain(votes, winner);
 
+		game.getMaster().notify(event);
 		for(Iterator<Player> it = game.playerIterator() ; it.hasNext() ; )
 			it.next().notify(event);
 	}
