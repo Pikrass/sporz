@@ -6,6 +6,8 @@ import net.pikrass.sporz.actions.ElectCaptain;
 import net.pikrass.sporz.actions.MutantsActions;
 import net.pikrass.sporz.actions.DoctorsAction;
 import net.pikrass.sporz.actions.ResetParalysis;
+import net.pikrass.sporz.actions.Lynch;
+import net.pikrass.sporz.actions.SettleLynch;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +26,8 @@ public class Game
 	private RoundPeriod period;
 
 	private List<Phase> phases;
-	private Phase captainPhase, mutantsPhase, doctorsPhase, infoPhase, dayPhase;
+	private Phase captainPhase, mutantsPhase, doctorsPhase, infoPhase,
+			dayPhase, settleLynchPhase;
 	private PhaseIterator curPhase;
 
 	private MutantsActions mutantsActions;
@@ -44,16 +47,21 @@ public class Game
 		this.doctorsPhase = new Phase(this);
 		this.infoPhase = new Phase(this);
 		this.dayPhase = new Phase(this);
+		this.settleLynchPhase = new Phase(this);
 
 		this.phases = new LinkedList<Phase>();
 		this.phases.add(mutantsPhase);
 		this.phases.add(doctorsPhase);
 		this.phases.add(infoPhase);
 		this.phases.add(dayPhase);
+		this.phases.add(settleLynchPhase);
 		this.phases.add(captainPhase);
 
 		this.mutantsActions = new MutantsActions(this);
 		this.doctorsAction = new DoctorsAction(this);
+
+		Lynch lynch = new Lynch(this);
+		SettleLynch settle = new SettleLynch(this, lynch);
 
 		mutantsPhase.addAction(new SwitchPeriod(this));
 		mutantsPhase.addAction(this.mutantsActions);
@@ -61,6 +69,8 @@ public class Game
 		dayPhase.addAction(new SwitchPeriod(this));
 		dayPhase.addAction(new ResetParalysis(this));
 		dayPhase.addAction(new ElectCaptain(this));
+		dayPhase.addAction(lynch);
+		settleLynchPhase.addAction(settle);
 		captainPhase.addAction(new ElectCaptain(this));
 	}
 

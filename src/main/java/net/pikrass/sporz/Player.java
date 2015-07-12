@@ -138,6 +138,8 @@ public abstract class Player
 	public abstract void notify(Sequencing.Hacked event);
 	public abstract void notify(MutantCount.Hacked event);
 	public abstract void notify(SpyReport event);
+	public abstract void notify(Lynching.Anonymous event);
+	public abstract void notify(LynchSettling event);
 
 	public abstract void ask(Game game, ElectCaptain action);
 	public abstract void ask(Game game, MutantsActions action);
@@ -147,6 +149,8 @@ public abstract class Player
 	public abstract void ask(Game game, Count action);
 	public abstract void ask(Game game, Hack action);
 	public abstract void ask(Game game, Spy action);
+	public abstract void ask(Game game, Lynch action);
+	public abstract void ask(Game game, SettleLynch action);
 
 	public abstract void stopAsking(ElectCaptain action);
 	public abstract void stopAsking(MutantsActions action);
@@ -156,6 +160,8 @@ public abstract class Player
 	public abstract void stopAsking(Count action);
 	public abstract void stopAsking(Hack action);
 	public abstract void stopAsking(Spy action);
+	public abstract void stopAsking(Lynch action);
+	public abstract void stopAsking(SettleLynch action);
 
 
 
@@ -206,6 +212,8 @@ public abstract class Player
 		public void notify(Sequencing.Hacked event) { }
 		public void notify(MutantCount.Hacked event) { }
 		public void notify(SpyReport event) { }
+		public void notify(Lynching.Anonymous event) { }
+		public void notify(LynchSettling event) { }
 
 		public void ask(Game game, ElectCaptain action) { }
 		public void ask(Game game, MutantsActions action) { }
@@ -215,6 +223,8 @@ public abstract class Player
 		public void ask(Game game, Count action) { }
 		public void ask(Game game, Hack action) { }
 		public void ask(Game game, Spy action) { }
+		public void ask(Game game, Lynch action) { }
+		public void ask(Game game, SettleLynch action) { }
 
 		public void stopAsking(ElectCaptain action) { }
 		public void stopAsking(MutantsActions action) { }
@@ -224,5 +234,7 @@ public abstract class Player
 		public void stopAsking(Count action) { }
 		public void stopAsking(Hack action) { }
 		public void stopAsking(Spy action) { }
+		public void stopAsking(Lynch action) { }
+		public void stopAsking(SettleLynch action) { }
 	}
 }

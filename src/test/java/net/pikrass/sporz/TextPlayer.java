@@ -274,6 +274,26 @@ public class TextPlayer extends Player
 		}
 	}
 
+	@Override
+	public void notify(Lynching.Anonymous event) {
+		if(event.isDraw()) {
+			StringBuffer buf = new StringBuffer();
+			for(Player p : event.getTargets())
+				buf.append(p.toString()+", ");
+			out.println("There is a draw between "+buf.substring(0, buf.length()-2));
+		} else {
+			if(event.getTarget().isNobody())
+				out.println("Nobody is to be killed today");
+			else
+				out.println("We deciced to kill "+event.getTarget());
+		}
+	}
+
+	@Override
+	public void notify(LynchSettling event) {
+		out.println("The captain, "+event.getOrigin()+" decided to kill "+event.getTarget());
+	}
+
 
 	@Override
 	public void ask(final Game game, final ElectCaptain action) {
@@ -631,6 +651,89 @@ public class TextPlayer extends Player
 	}
 
 	@Override
+	public void ask(final Game game, final Lynch action) {
+		this.sink = (new Thread() {
+			@Override
+			public void run() {
+				out.println("Choose who you'd like to kill today");
+
+				while(true) {
+					out.print("> ");
+
+					String nick = null;
+					synchronized (line) {
+						try {
+							line.wait();
+						} catch(InterruptedException e) {
+							return;
+						}
+						nick = line.toString();
+					}
+
+					Player p = null;
+					if(nick.equals("nobody"))
+						p = Player.NOBODY;
+					else
+						p = game.getPlayer(nick);
+
+					if(p == null) {
+						out.println("This player doesn't exist!");
+						continue;
+					}
+
+					action.choose(TextPlayer.this, action.new Vote(p));
+					out.println("OK. You can change your choice until the end of the phase.");
+				}
+			}
+		});
+
+		this.sink.start();
+	}
+
+	@Override
+	public void ask(final Game game, final SettleLynch action) {
+		this.sink = (new Thread() {
+			@Override
+			public void run() {
+				out.println("There is a draw and you're the captain. Choose today's victim.");
+
+				while(true) {
+					out.print("> ");
+
+					String nick = null;
+					synchronized (line) {
+						try {
+							line.wait();
+						} catch(InterruptedException e) {
+							return;
+						}
+						nick = line.toString();
+					}
+
+					Player p = null;
+					if(nick.equals("nobody"))
+						p = Player.NOBODY;
+					else
+						p = game.getPlayer(nick);
+
+					if(p == null) {
+						out.println("This player doesn't exist!");
+						continue;
+					}
+
+					try {
+						action.choose(TextPlayer.this, action.new Do(p));
+					} catch(InvalidChoiceException e) {
+						out.println("Please choose one of the players in a draw");
+					}
+				}
+			}
+		});
+
+		this.sink.start();
+	}
+
+	@Override
 	public void stopAsking(ElectCaptain action) {
 		this.sink.interrupt();
 	}
@@ -667,6 +770,16 @@ public class TextPlayer extends Player
 
 	@Override
 	public void stopAsking(Spy action) {
+		this.sink.interrupt();
+	}
+
+	@Override
+	public void stopAsking(Lynch action) {
+		this.sink.interrupt();
+	}
+
+	@Override
+	public void stopAsking(SettleLynch action) {
 		this.sink.interrupt();
 	}
 }
