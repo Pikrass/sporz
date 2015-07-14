@@ -46,12 +46,12 @@ public class Game
 
 		this.master = new UselessMaster();
 
-		this.captainPhase = new Phase(this);
-		this.mutantsPhase = new Phase(this);
-		this.doctorsPhase = new Phase(this);
-		this.infoPhase = new Phase(this);
-		this.dayPhase = new Phase(this);
-		this.settleLynchPhase = new Phase(this);
+		this.captainPhase = new Phase(this, "captain");
+		this.mutantsPhase = new Phase(this, "mutants");
+		this.doctorsPhase = new Phase(this, "doctors");
+		this.infoPhase = new Phase(this, "info");
+		this.dayPhase = new Phase(this, "day");
+		this.settleLynchPhase = new Phase(this, "settle");
 
 		this.phases = new LinkedList<Phase>();
 		this.phases.add(mutantsPhase);
@@ -95,6 +95,7 @@ public class Game
 		while((phase = curPhase.next()) != this.captainPhase);
 
 		while(true) {
+			master.notifyPhase(phase.getName());
 			phase.run();
 			phase = curPhase.next();
 		}

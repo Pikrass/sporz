@@ -8,14 +8,20 @@ import java.util.ArrayList;
 public class Phase
 {
 	private Game game;
+	private String name;
 	private List<Action> actions;
 	private int nbDone;
 
 	private Object mutex;
 
-	public Phase(Game game) {
+	public Phase(Game game, String name) {
 		this.game = game;
+		this.name = name;
 		this.actions = new ArrayList<Action>();
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public void addAction(Action action) {

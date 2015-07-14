@@ -5,6 +5,7 @@ import net.pikrass.sporz.events.*;
 public interface Master
 {
 	public void notifyRound(int num, RoundPeriod period);
+	public void notifyPhase(String name);
 	public void notify(Attribution event);
 	public void notify(NewCaptain event);
 	public void notify(Paralysis event);
