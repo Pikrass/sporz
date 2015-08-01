@@ -97,6 +97,7 @@ public class CustomRules extends Rules
 		this.roles.put(Role.COMPUTER_ENGINEER, 1);
 		this.roles.put(Role.HACKER, 1);
 		this.roles.put(Role.SPY, 1);
+		this.roles.put(Role.TRAITOR, 0);
 		this.nbMutants = 1;
 		this.nbHosts = 1;
 		this.nbResistants = 1;
