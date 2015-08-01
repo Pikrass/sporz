@@ -33,6 +33,10 @@ public class Spy extends PlayerAction<Spy.Do>
 		spy.ask(game, this);
 	}
 
+	public void stop() {
+		spy.stopAsking(this);
+	}
+
 	public void choose(Player player, Do choice) {
 		this.choice = choice;
 		done(choice != null);
@@ -41,6 +45,8 @@ public class Spy extends PlayerAction<Spy.Do>
 	public void executeAction() {
 		if(choice == null)
 			return;
+
+		stop();
 
 		choice.run(game);
 	}

@@ -27,6 +27,10 @@ public class Count extends PlayerAction<Count.Do> implements Hackable {
 		engineer.ask(game, this);
 	}
 
+	public void stop() {
+		engineer.stopAsking(this);
+	}
+
 	public void choose(Player player, Do choice) {
 		this.choice = choice;
 		done(choice != null);
@@ -36,7 +40,7 @@ public class Count extends PlayerAction<Count.Do> implements Hackable {
 		if(choice == null)
 			return;
 
-		engineer.stopAsking(this);
+		stop();
 
 		choice.run(game);
 	}

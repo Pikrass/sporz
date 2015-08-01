@@ -73,6 +73,10 @@ public class Hack extends PlayerAction<Hack.Do>
 		hacker.ask(game, this);
 	}
 
+	public void stop() {
+		hacker.stopAsking(this);
+	}
+
 	public void choose(Player player, Do choice) {
 		this.choice = choice;
 		done(choice != null);
@@ -83,6 +87,8 @@ public class Hack extends PlayerAction<Hack.Do>
 			lastChoice = null;
 			return;
 		}
+
+		stop();
 
 		choice.run(game);
 

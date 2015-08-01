@@ -37,6 +37,11 @@ public class DoctorsAction extends PlayerAction<DoctorsAction.DoctorChoice>
 			done(true);
 	}
 
+	public void stop() {
+		for(Player doctor : doctors)
+			doctor.stopAsking(this);
+	}
+
 	public void choose(Player player, DoctorChoice choice) {
 		if(choice == null) {
 			choices.clear();
@@ -52,6 +57,8 @@ public class DoctorsAction extends PlayerAction<DoctorsAction.DoctorChoice>
 	public void executeAction() {
 		if(doctors.size() == 0)
 			return;
+
+		stop();
 
 		for(DoctorChoice choice : choices)
 			choice.run(game);

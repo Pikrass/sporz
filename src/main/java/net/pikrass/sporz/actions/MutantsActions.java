@@ -42,6 +42,11 @@ public class MutantsActions extends PlayerAction<MutantsActions.MutantChoice>
 			done(true);
 	}
 
+	public void stop() {
+		for(Player mutant : mutants)
+			mutant.stopAsking(this);
+	}
+
 	public void choose(Player player, MutantChoice choice) {
 		if(choice == null) {
 			choice1 = null;
@@ -59,6 +64,7 @@ public class MutantsActions extends PlayerAction<MutantsActions.MutantChoice>
 	public void executeAction() {
 		if(mutants.size() == 0)
 			return;
+		stop();
 		choice1.run(game);
 		choice2.run(game);
 	}

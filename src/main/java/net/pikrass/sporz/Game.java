@@ -28,7 +28,8 @@ public class Game
 	private List<Phase> phases;
 	private Phase captainPhase, mutantsPhase, doctorsPhase, infoPhase,
 			dayPhase, settleLynchPhase;
-	private PhaseIterator curPhase;
+	private PhaseIterator phaseIt;
+	private Phase curPhase;
 
 	private MutantsActions mutantsActions;
 	private DoctorsAction doctorsAction;
@@ -79,7 +80,7 @@ public class Game
 	}
 
 	public void start() {
-		curPhase = new PhaseIterator(phases);
+		phaseIt = new PhaseIterator(phases);
 
 		started = true;
 
@@ -87,19 +88,33 @@ public class Game
 		nextPeriod();
 
 		// Skip all phases but the captain one for day 0
-		Phase phase;
-		while((phase = curPhase.next()) != this.captainPhase);
+		while(nextPhase() != this.captainPhase);
 
-		runPhase(phase);
+		runPhase();
 	}
 
 	public void step() {
-		runPhase(curPhase.next());
+		nextPhase();
+		runPhase();
 	}
 
-	private void runPhase(Phase phase) {
-		master.notifyPhase(phase.getName());
-		phase.run();
+	private Phase nextPhase() {
+		curPhase = phaseIt.next();
+		return curPhase;
+	}
+
+	private void runPhase() {
+		master.notifyPhase(curPhase.getName());
+		curPhase.run();
+	}
+
+	public void end() {
+		if(!started)
+			return;
+
+		curPhase.stop();
+
+		started = false;
 	}
 
 	public void addInfoAction(Action a) {

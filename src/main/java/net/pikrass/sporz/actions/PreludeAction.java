@@ -17,5 +17,9 @@ public abstract class PreludeAction extends Action {
 	protected void executeAction() {
 	}
 
+	@Override
+	public void stop() {
+	}
+
 	protected abstract void doAction();
 }

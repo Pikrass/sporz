@@ -32,6 +32,11 @@ public class ElectCaptain extends PlayerAction<ElectCaptain.Vote>
 			it.next().ask(game, this);
 	}
 
+	public void stop() {
+		for(Iterator<Player> it = game.playerIterator() ; it.hasNext() ; )
+			it.next().stopAsking(this);
+	}
+
 	public void choose(Player player, Vote choice) {
 		if(choice != null)
 			votes.put(player, choice.getChoice());
@@ -50,8 +55,7 @@ public class ElectCaptain extends PlayerAction<ElectCaptain.Vote>
 		if(game.getCaptain() != null)
 			return;
 
-		for(Iterator<Player> it = game.playerIterator() ; it.hasNext() ; )
-			it.next().stopAsking(this);
+		stop();
 
 		game.setCaptain(winner);
 

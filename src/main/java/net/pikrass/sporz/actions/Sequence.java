@@ -28,6 +28,10 @@ public class Sequence extends PlayerAction<Sequence.Do>
 		genet.ask(game, this);
 	}
 
+	public void stop() {
+		genet.stopAsking(this);
+	}
+
 	public void choose(Player player, Do choice) {
 		this.choice = choice;
 		done(choice != null);
@@ -37,7 +41,7 @@ public class Sequence extends PlayerAction<Sequence.Do>
 		if(choice == null)
 			return;
 
-		genet.stopAsking(this);
+		stop();
 
 		choice.run(game);
 	}

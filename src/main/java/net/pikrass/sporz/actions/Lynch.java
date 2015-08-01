@@ -35,6 +35,11 @@ public class Lynch extends PlayerAction<Lynch.Vote>
 			it.next().ask(game, this);
 	}
 
+	public void stop() {
+		for(Iterator<Player> it = game.playerIterator() ; it.hasNext() ; )
+			it.next().stopAsking(this);
+	}
+
 	public void choose(Player player, Vote choice) {
 		if(choice != null)
 			votes.put(player, choice.getChoice());
@@ -50,8 +55,7 @@ public class Lynch extends PlayerAction<Lynch.Vote>
 	}
 
 	protected void executeAction() {
-		for(Iterator<Player> it = game.playerIterator() ; it.hasNext() ; )
-			it.next().stopAsking(this);
+		stop();
 
 		Lynching event = new Lynching(votes, winners);
 

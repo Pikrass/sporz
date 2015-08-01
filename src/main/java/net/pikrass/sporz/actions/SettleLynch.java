@@ -27,6 +27,10 @@ public class SettleLynch extends PlayerAction<SettleLynch.Do>
 		game.getCaptain().ask(game, this);
 	}
 
+	public void stop() {
+		game.getCaptain().stopAsking(this);
+	}
+
 	public void choose(Player player, Do choice) {
 		this.choice = choice;
 		done(choice != null);
@@ -36,7 +40,7 @@ public class SettleLynch extends PlayerAction<SettleLynch.Do>
 		if(!lynch.isDraw())
 			return;
 
-		game.getCaptain().stopAsking(this);
+		stop();
 
 		choice.run(game);
 	}

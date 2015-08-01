@@ -28,6 +28,10 @@ public class Psychoanalyse extends PlayerAction<Psychoanalyse.Do>
 		psy.ask(game, this);
 	}
 
+	public void stop() {
+		psy.stopAsking(this);
+	}
+
 	public void choose(Player player, Do choice) {
 		this.choice = choice;
 		done(choice != null);
@@ -37,7 +41,7 @@ public class Psychoanalyse extends PlayerAction<Psychoanalyse.Do>
 		if(choice == null)
 			return;
 
-		psy.stopAsking(this);
+		stop();
 
 		choice.run(game);
 	}

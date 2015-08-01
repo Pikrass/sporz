@@ -40,6 +40,12 @@ public class Phase
 		}
 	}
 
+	public void stop() {
+		for(Action action : actions) {
+			action.stop();
+		}
+	}
+
 	private void end() {
 		for(Action action : actions) {
 			action.execute();

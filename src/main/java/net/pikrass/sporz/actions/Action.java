@@ -27,4 +27,5 @@ public abstract class Action {
 
 	protected abstract void startAction();
 	protected abstract void executeAction();
+	public abstract void stop();
 }
