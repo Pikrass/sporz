@@ -130,7 +130,7 @@ public class CustomRules extends Rules
 
 	private Player attribute(Game game, List<Player> players, Role role) {
 		Player p = sample(players);
-		p.setRole(Role.GENETICIST);
+		p.setRole(role);
 
 		Attribution a = p.makeAttribution();
 		game.getMaster().notify(a);
