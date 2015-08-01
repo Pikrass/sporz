@@ -12,8 +12,6 @@ public class Phase
 	private List<Action> actions;
 	private int nbDone;
 
-	private Object mutex;
-
 	public Phase(Game game, String name) {
 		this.game = game;
 		this.name = name;
@@ -29,10 +27,10 @@ public class Phase
 	}
 
 	public void run() {
-		if(actions.isEmpty())
+		if(actions.isEmpty()) {
+			game.step();
 			return;
-
-		this.mutex = new Object();
+		}
 
 		nbDone = 0;
 
@@ -40,19 +38,14 @@ public class Phase
 			Tracker tracker = new Tracker();
 			action.start(tracker);
 		}
+	}
 
-		synchronized (mutex) {
-			while(nbDone != actions.size()) {
-				try {
-					mutex.wait();
-				} catch(InterruptedException e) {
-				}
-			}
-		}
-
+	private void end() {
 		for(Action action : actions) {
 			action.execute();
 		}
+
+		game.step();
 	}
 
 	public class Tracker {
@@ -68,14 +61,12 @@ public class Phase
 
 			state = isDone;
 
-			synchronized (mutex) {
-				if(state) {
-					nbDone++;
-					if(nbDone == actions.size())
-						mutex.notifyAll();
-				} else {
-					nbDone--;
-				}
+			if(state) {
+				nbDone++;
+				if(nbDone == actions.size())
+					end();
+			} else {
+				nbDone--;
 			}
 		}
 	}

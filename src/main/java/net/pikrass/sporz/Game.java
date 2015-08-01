@@ -82,23 +82,24 @@ public class Game
 		curPhase = new PhaseIterator(phases);
 
 		started = true;
-		loop();
-	}
-
-	private void loop() {
-		Phase phase;
 
 		// Go into DAY 0
 		nextPeriod();
 
 		// Skip all phases but the captain one for day 0
+		Phase phase;
 		while((phase = curPhase.next()) != this.captainPhase);
 
-		while(true) {
-			master.notifyPhase(phase.getName());
-			phase.run();
-			phase = curPhase.next();
-		}
+		runPhase(phase);
+	}
+
+	public void step() {
+		runPhase(curPhase.next());
+	}
+
+	private void runPhase(Phase phase) {
+		master.notifyPhase(phase.getName());
+		phase.run();
 	}
 
 	public void addInfoAction(Action a) {
