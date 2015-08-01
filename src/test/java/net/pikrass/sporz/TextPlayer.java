@@ -13,41 +13,25 @@ import java.io.IOException;
 
 public class TextPlayer extends Player
 {
-	private BufferedReader in;
 	private PrintStream out;
+	private ActionHandler handler;
 
-	private StringBuffer line;
-	private Thread source, sink;
-
-	public TextPlayer(String name, InputStream in, PrintStream out) {
+	public TextPlayer(String name, PrintStream out) {
 		super(name);
-		this.in = new BufferedReader(new InputStreamReader(in));
 		this.out = out;
+		this.handler = null;
 
 		out.println("Welcome, "+name);
-
-		this.line = new StringBuffer();
-		this.source = new SourceThread();
-		this.source.start();
 	}
 
-	public class SourceThread extends Thread {
-		@Override
-		public void run() {
-			String read;
-			try {
-				while(true) {
-					read = in.readLine();
-					synchronized (line) {
-						line.delete(0, line.length());
-						line.append(read);
-						line.notify();
-					}
-				}
-			} catch(IOException e) {
-				System.err.println("Input closed ("+getName()+")");
-			}
-		}
+	public void input(String msg) {
+		if(handler != null)
+			handler.onMessage(msg);
+	}
+
+	private interface ActionHandler {
+		public void start();
+		public void onMessage(String msg);
 	}
 
 	@Override
@@ -297,32 +281,21 @@ public class TextPlayer extends Player
 
 	@Override
 	public void ask(final Game game, final ElectCaptain action) {
-		this.sink = (new Thread() {
+		this.handler = (new ActionHandler() {
 			@Override
-			public void run() {
+			public void start() {
+				out.println("Election! Vote for a captain!");
+				out.print("> ");
+			}
+
+			@Override
+			public void onMessage(String msg) {
 				Player p = null;
 
-				out.println("Election! Vote for a captain!");
-
-				while(true) {
-					out.print("> ");
-
-					String nick = null;
-					synchronized (line) {
-						try {
-							line.wait();
-						} catch(InterruptedException e) {
-							return;
-						}
-						nick = line.toString();
-					}
-
-					p = game.getPlayer(nick);
-					if(p == null) {
-						out.println("This player doesn't exist!");
-						continue;
-					}
-
+				p = game.getPlayer(msg);
+				if(p == null) {
+					out.println("This player doesn't exist!");
+				} else {
 					try {
 						action.choose(TextPlayer.this, action.new Vote(p));
 						out.println("OK. You can change your vote until the end of the election.");
@@ -330,456 +303,388 @@ public class TextPlayer extends Player
 						throw new Error("BlankVoteProhibitedException");
 					}
 				}
+
+				out.print("> ");
 			}
 		});
 
-		this.sink.start();
+		this.handler.start();
 	}
 
 	@Override
 	public void ask(final Game game, final MutantsActions action) {
-		this.sink = (new Thread() {
+		this.handler = (new ActionHandler() {
 			Pattern cmdRegexp = Pattern.compile("(mutate|kill|paralyse) (.+)");
 
 			@Override
-			public void run() {
+			public void start() {
 				out.println("Mutants! Do what you have to do...");
+				out.print("> ");
+			}
 
-				while(true) {
+			@Override
+			public void onMessage(String msg) {
+				Matcher m = cmdRegexp.matcher(msg);
+				if(!m.matches()) {
+					out.println("I expect kill, mutate, or paralyse (with a target)");
 					out.print("> ");
-
-					String cmd = null;
-					synchronized (line) {
-						try {
-							line.wait();
-						} catch(InterruptedException e) {
-							return;
-						}
-						cmd = line.toString();
-					}
-
-					Matcher m = cmdRegexp.matcher(cmd);
-					if(!m.matches()) {
-						out.println("I expect kill, mutate, or paralyse (with a target)");
-						continue;
-					}
-
-					Player p;
-					if(m.group(2).equals("nobody"))
-						p = Player.NOBODY;
-					else
-						p = game.getPlayer(m.group(2));
-
-					if(p == null) {
-						out.println("This player doesn't exist!");
-						continue;
-					}
-
-					MutantsActions.MutantChoice choice;
-					if(m.group(1).equals("kill"))
-						choice = action.new Kill(p);
-					else if(m.group(1).equals("mutate"))
-						choice = action.new Mutate(p);
-					else
-						choice = action.new Paralyse(p);
-
-					action.choose(TextPlayer.this, choice);
+					return;
 				}
+
+				Player p;
+				if(m.group(2).equals("nobody"))
+					p = Player.NOBODY;
+				else
+					p = game.getPlayer(m.group(2));
+
+				if(p == null) {
+					out.println("This player doesn't exist!");
+					out.print("> ");
+					return;
+				}
+
+				MutantsActions.MutantChoice choice;
+				if(m.group(1).equals("kill"))
+					choice = action.new Kill(p);
+				else if(m.group(1).equals("mutate"))
+					choice = action.new Mutate(p);
+				else
+					choice = action.new Paralyse(p);
+
+				action.choose(TextPlayer.this, choice);
+
+				out.print("> ");
 			}
 		});
 
-		this.sink.start();
+		this.handler.start();
 	}
 
 	@Override
 	public void ask(final Game game, final DoctorsAction action) {
-		this.sink = (new Thread() {
+		this.handler = (new ActionHandler() {
 			Pattern cmdRegexp = Pattern.compile("(heal|kill) (.+)");
 
 			@Override
-			public void run() {
+			public void start() {
 				out.println("Doctors! You can either heal or kill.");
+				out.print("> ");
+			}
 
-				while(true) {
+			@Override
+			public void onMessage(String msg) {
+				Matcher m = cmdRegexp.matcher(msg);
+				if(!m.matches()) {
+					out.println("I expect kill or heal (with a target)");
 					out.print("> ");
-
-					String cmd = null;
-					synchronized (line) {
-						try {
-							line.wait();
-						} catch(InterruptedException e) {
-							return;
-						}
-						cmd = line.toString();
-					}
-
-					Matcher m = cmdRegexp.matcher(cmd);
-					if(!m.matches()) {
-						out.println("I expect kill or heal (with a target)");
-						continue;
-					}
-
-					Player p;
-					if(m.group(2).equals("nobody"))
-						p = Player.NOBODY;
-					else
-						p = game.getPlayer(m.group(2));
-
-					if(p == null) {
-						out.println("This player doesn't exist!");
-						continue;
-					}
-
-					DoctorsAction.DoctorChoice choice;
-					if(m.group(1).equals("kill"))
-						choice = action.new Kill(p);
-					else
-						choice = action.new Heal(p);
-
-					action.choose(TextPlayer.this, choice);
+					return;
 				}
+
+				Player p;
+				if(m.group(2).equals("nobody"))
+					p = Player.NOBODY;
+				else
+					p = game.getPlayer(m.group(2));
+
+				if(p == null) {
+					out.println("This player doesn't exist!");
+					out.print("> ");
+					return;
+				}
+
+				DoctorsAction.DoctorChoice choice;
+				if(m.group(1).equals("kill"))
+					choice = action.new Kill(p);
+				else
+					choice = action.new Heal(p);
+
+				action.choose(TextPlayer.this, choice);
+
+				out.print("> ");
 			}
 		});
 
-		this.sink.start();
+		this.handler.start();
 	}
 
 	@Override
 	public void ask(final Game game, final Psychoanalyse action) {
-		this.sink = (new Thread() {
+		this.handler = (new ActionHandler() {
 			@Override
-			public void run() {
+			public void start() {
 				out.println("You can choose someone to psychanalyse");
+				out.print("> ");
+			}
 
-				while(true) {
+			@Override
+			public void onMessage(String msg) {
+				Player p = null;
+				if(msg.equals("nobody"))
+					p = Player.NOBODY;
+				else
+					p = game.getPlayer(msg);
+
+				if(p == null) {
+					out.println("This player doesn't exist!");
 					out.print("> ");
-
-					String nick = null;
-					synchronized (line) {
-						try {
-							line.wait();
-						} catch(InterruptedException e) {
-							return;
-						}
-						nick = line.toString();
-					}
-
-					Player p = null;
-					if(nick.equals("nobody"))
-						p = Player.NOBODY;
-					else
-						p = game.getPlayer(nick);
-
-					if(p == null) {
-						out.println("This player doesn't exist!");
-						continue;
-					}
-
-					action.choose(TextPlayer.this, action.new Do(p));
-					out.println("OK. You can change your choice until the end of the phase.");
+					return;
 				}
+
+				action.choose(TextPlayer.this, action.new Do(p));
+				out.println("OK. You can change your choice until the end of the phase.");
+				out.print("> ");
 			}
 		});
 
-		this.sink.start();
+		this.handler.start();
 	}
 
 	@Override
 	public void ask(final Game game, final Sequence action) {
-		this.sink = (new Thread() {
+		this.handler = (new ActionHandler() {
 			@Override
-			public void run() {
+			public void start() {
 				out.println("You can choose someone whose genome to sequence");
+				out.print("> ");
+			}
 
-				while(true) {
+			@Override
+			public void onMessage(String msg) {
+				Player p = null;
+				if(msg.equals("nobody"))
+					p = Player.NOBODY;
+				else
+					p = game.getPlayer(msg);
+
+				if(p == null) {
+					out.println("This player doesn't exist!");
 					out.print("> ");
-
-					String nick = null;
-					synchronized (line) {
-						try {
-							line.wait();
-						} catch(InterruptedException e) {
-							return;
-						}
-						nick = line.toString();
-					}
-
-					Player p = null;
-					if(nick.equals("nobody"))
-						p = Player.NOBODY;
-					else
-						p = game.getPlayer(nick);
-
-					if(p == null) {
-						out.println("This player doesn't exist!");
-						continue;
-					}
-
-					action.choose(TextPlayer.this, action.new Do(p));
-					out.println("OK. You can change your choice until the end of the phase.");
+					return;
 				}
+
+				action.choose(TextPlayer.this, action.new Do(p));
+				out.println("OK. You can change your choice until the end of the phase.");
+				out.print("> ");
 			}
 		});
 
-		this.sink.start();
+		this.handler.start();
 	}
 
 	@Override
 	public void ask(final Game game, final Count action) {
-		this.sink = (new Thread() {
+		this.handler = (new ActionHandler() {
 			@Override
-			public void run() {
+			public void start() {
 				out.println("Do you want to count the mutants ?");
+				out.print("> ");
+			}
 
-				while(true) {
+			@Override
+			public void onMessage(String msg) {
+				boolean choice;
+				if(msg.equals("yes")) {
+					choice = true;
+				} else if(msg.equals("no")) {
+					choice = false;
+				} else {
+					out.println("Type yes or no");
 					out.print("> ");
-
-					String res = null;
-					synchronized (line) {
-						try {
-							line.wait();
-						} catch(InterruptedException e) {
-							return;
-						}
-						res = line.toString();
-					}
-
-					boolean choice;
-					if(res.equals("yes")) {
-						choice = true;
-					} else if(res.equals("no")) {
-						choice = false;
-					} else {
-						out.println("Type yes or no");
-						continue;
-					}
-
-					action.choose(TextPlayer.this, action.new Do(choice));
-					out.println("OK. You can change your vote until the end of the election.");
+					return;
 				}
+
+				action.choose(TextPlayer.this, action.new Do(choice));
+				out.println("OK. You can change your vote until the end of the election.");
+				out.print("> ");
 			}
 		});
 
-		this.sink.start();
+		this.handler.start();
 	}
 
 	@Override
 	public void ask(final Game game, final Hack action) {
-		this.sink = (new Thread() {
+		this.handler = (new ActionHandler() {
 			@Override
-			public void run() {
+			public void start() {
 				out.println("What role do you want to hack?");
+				out.print("> ");
+			}
 
-				while(true) {
+			@Override
+			public void onMessage(String msg) {
+				String choice = null;
+				if(msg.equals("psy")) {
+					choice = "p1";
+				} else if(msg.equals("genet")) {
+					choice = "g1";
+				} else if(msg.equals("engineer")) {
+					choice = "c1";
+				} else if(msg.equals("nothing")) {
+					choice = null;
+				} else {
+					out.println("Type psy, genet, engineer or nothing");
 					out.print("> ");
-
-					String res = null;
-					synchronized (line) {
-						try {
-							line.wait();
-						} catch(InterruptedException e) {
-							return;
-						}
-						res = line.toString();
-					}
-
-					String choice;
-					if(res.equals("psy")) {
-						choice = "p1";
-					} else if(res.equals("genet")) {
-						choice = "g1";
-					} else if(res.equals("engineer")) {
-						choice = "c1";
-					} else if(res.equals("nothing")) {
-						choice = null;
-					} else {
-						out.println("Type psy, genet, engineer or nothing");
-						continue;
-					}
-
-					try {
-						action.choose(TextPlayer.this, action.new Do(choice));
-						out.println("OK. You can change your vote until the end of the election.");
-					} catch(InvalidChoiceException e) {
-						out.println("You hacked this role last night, please choose another one.");
-					}
+					return;
 				}
+
+				try {
+					action.choose(TextPlayer.this, action.new Do(choice));
+					out.println("OK. You can change your vote until the end of the election.");
+				} catch(InvalidChoiceException e) {
+					out.println("You hacked this role last night, please choose another one.");
+				}
+				out.print("> ");
 			}
 		});
 
-		this.sink.start();
+		this.handler.start();
 	}
 
 	@Override
 	public void ask(final Game game, final Spy action) {
-		this.sink = (new Thread() {
+		this.handler = (new ActionHandler() {
 			@Override
-			public void run() {
+			public void start() {
 				out.println("You can choose someone to spy on");
+				out.print("> ");
+			}
 
-				while(true) {
+			@Override
+			public void onMessage(String msg) {
+				Player p = null;
+				if(msg.equals("nobody"))
+					p = Player.NOBODY;
+				else
+					p = game.getPlayer(msg);
+
+				if(p == null) {
+					out.println("This player doesn't exist!");
 					out.print("> ");
-
-					String nick = null;
-					synchronized (line) {
-						try {
-							line.wait();
-						} catch(InterruptedException e) {
-							return;
-						}
-						nick = line.toString();
-					}
-
-					Player p = null;
-					if(nick.equals("nobody"))
-						p = Player.NOBODY;
-					else
-						p = game.getPlayer(nick);
-
-					if(p == null) {
-						out.println("This player doesn't exist!");
-						continue;
-					}
-
-					action.choose(TextPlayer.this, action.new Do(p));
-					out.println("OK. You can change your choice until the end of the phase.");
 				}
+
+				action.choose(TextPlayer.this, action.new Do(p));
+				out.println("OK. You can change your choice until the end of the phase.");
+				out.print("> ");
 			}
 		});
 
-		this.sink.start();
+		this.handler.start();
 	}
 
 	@Override
 	public void ask(final Game game, final Lynch action) {
-		this.sink = (new Thread() {
+		this.handler = (new ActionHandler() {
 			@Override
-			public void run() {
+			public void start() {
 				out.println("Choose who you'd like to kill today");
+				out.print("> ");
+			}
 
-				while(true) {
+			@Override
+			public void onMessage(String msg) {
+				Player p = null;
+				if(msg.equals("nobody"))
+					p = Player.NOBODY;
+				else
+					p = game.getPlayer(msg);
+
+				if(p == null) {
+					out.println("This player doesn't exist!");
 					out.print("> ");
-
-					String nick = null;
-					synchronized (line) {
-						try {
-							line.wait();
-						} catch(InterruptedException e) {
-							return;
-						}
-						nick = line.toString();
-					}
-
-					Player p = null;
-					if(nick.equals("nobody"))
-						p = Player.NOBODY;
-					else
-						p = game.getPlayer(nick);
-
-					if(p == null) {
-						out.println("This player doesn't exist!");
-						continue;
-					}
-
-					action.choose(TextPlayer.this, action.new Vote(p));
-					out.println("OK. You can change your choice until the end of the phase.");
+					return;
 				}
+
+				action.choose(TextPlayer.this, action.new Vote(p));
+				out.println("OK. You can change your choice until the end of the phase.");
 			}
 		});
 
-		this.sink.start();
+		this.handler.start();
 	}
 
 	@Override
 	public void ask(final Game game, final SettleLynch action) {
-		this.sink = (new Thread() {
+		this.handler = (new ActionHandler() {
 			@Override
-			public void run() {
+			public void start() {
 				out.println("There is a draw and you're the captain. Choose today's victim.");
+				out.print("> ");
+			}
 
-				while(true) {
+			@Override
+			public void onMessage(String msg) {
+				Player p = null;
+				if(msg.equals("nobody"))
+					p = Player.NOBODY;
+				else
+					p = game.getPlayer(msg);
+
+				if(p == null) {
+					out.println("This player doesn't exist!");
 					out.print("> ");
+					return;
+				}
 
-					String nick = null;
-					synchronized (line) {
-						try {
-							line.wait();
-						} catch(InterruptedException e) {
-							return;
-						}
-						nick = line.toString();
-					}
-
-					Player p = null;
-					if(nick.equals("nobody"))
-						p = Player.NOBODY;
-					else
-						p = game.getPlayer(nick);
-
-					if(p == null) {
-						out.println("This player doesn't exist!");
-						continue;
-					}
-
-					try {
-						action.choose(TextPlayer.this, action.new Do(p));
-					} catch(InvalidChoiceException e) {
-						out.println("Please choose one of the players in a draw");
-					}
+				try {
+					action.choose(TextPlayer.this, action.new Do(p));
+				} catch(InvalidChoiceException e) {
+					out.println("Please choose one of the players in a draw");
+					out.print("> ");
 				}
 			}
 		});
 
-		this.sink.start();
+		this.handler.start();
 	}
 
 	@Override
 	public void stopAsking(ElectCaptain action) {
-		this.sink.interrupt();
+		this.handler = null;
 	}
 
 	@Override
 	public void stopAsking(MutantsActions action) {
-		this.sink.interrupt();
+		this.handler = null;
 	}
 
 	@Override
 	public void stopAsking(DoctorsAction action) {
-		this.sink.interrupt();
+		this.handler = null;
 	}
 
 	@Override
 	public void stopAsking(Psychoanalyse action) {
-		this.sink.interrupt();
+		this.handler = null;
 	}
 
 	@Override
 	public void stopAsking(Sequence action) {
-		this.sink.interrupt();
+		this.handler = null;
 	}
 
 	@Override
 	public void stopAsking(Count action) {
-		this.sink.interrupt();
+		this.handler = null;
 	}
 
 	@Override
 	public void stopAsking(Hack action) {
-		this.sink.interrupt();
+		this.handler = null;
 	}
 
 	@Override
 	public void stopAsking(Spy action) {
-		this.sink.interrupt();
+		this.handler = null;
 	}
 
 	@Override
 	public void stopAsking(Lynch action) {
-		this.sink.interrupt();
+		this.handler = null;
 	}
 
 	@Override
 	public void stopAsking(SettleLynch action) {
-		this.sink.interrupt();
+		this.handler = null;
 	}
 }
