@@ -165,12 +165,12 @@ public class CustomRules extends Rules
 			doc.setRole(Role.DOCTOR);
 			if(isLyonRule())
 				doc.setGenome(Genome.RESISTANT);
-
+			docs.add(doc);
+		}
+		for(Player doc : docs) {
 			Attribution a = doc.makeAttribution(docs);
 			game.getMaster().notify(a);
 			doc.notify(a);
-
-			docs.add(doc);
 		}
 
 		// Additionnal hosts and resistants
