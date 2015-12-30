@@ -30,7 +30,7 @@ public class StandardRules extends Rules {
 		int rem = game.getNbPlayers();
 
 		// Initial mutant
-		Player mutant = players.remove((int)Math.floor(Math.random()*rem--));
+		Player mutant = players.remove(rng.nextInt(rem--));
 		mutant.setState(State.MUTANT);
 		mutant.setGenome(Genome.HOST);
 		Attribution mutA = mutant.makeAttribution();
@@ -39,8 +39,8 @@ public class StandardRules extends Rules {
 
 		// Doctors
 		List<Player> docs = new LinkedList<Player>();
-		docs.add(players.remove((int)Math.floor(Math.random()*rem--)));
-		docs.add(players.remove((int)Math.floor(Math.random()*rem--)));
+		docs.add(players.remove(rng.nextInt(rem--)));
+		docs.add(players.remove(rng.nextInt(rem--)));
 		for(Player doc : docs) {
 			doc.setRole(Role.DOCTOR);
 			Attribution a = doc.makeAttribution(docs);
@@ -49,19 +49,19 @@ public class StandardRules extends Rules {
 		}
 
 		// Additionnal host and resistant
-		Player host = players.get((int)Math.floor(Math.random()*rem));
+		Player host = players.get(rng.nextInt(rem));
 		host.setGenome(Genome.HOST);
 		Player res = host;
 		while(res == host)
-			res = players.get((int)Math.floor(Math.random()*rem));
+			res = players.get(rng.nextInt(rem));
 		res.setGenome(Genome.RESISTANT);
 
 		// Informative roles
-		Player psy = players.remove((int)Math.floor(Math.random()*rem--)),
-			   gen = players.remove((int)Math.floor(Math.random()*rem--)),
-			   eng = players.remove((int)Math.floor(Math.random()*rem--)),
-			   hac = players.remove((int)Math.floor(Math.random()*rem--)),
-			   spy = players.remove((int)Math.floor(Math.random()*rem--));
+		Player psy = players.remove(rng.nextInt(rem--)),
+			   gen = players.remove(rng.nextInt(rem--)),
+			   eng = players.remove(rng.nextInt(rem--)),
+			   hac = players.remove(rng.nextInt(rem--)),
+			   spy = players.remove(rng.nextInt(rem--));
 
 		psy.setRole(Role.PSYCHOLOGIST);
 		gen.setRole(Role.GENETICIST);
@@ -110,7 +110,7 @@ public class StandardRules extends Rules {
 
 		// If there are enough players, let's add a traitor
 		if(rem > 0) {
-			Player traitor = players.remove((int)Math.floor(Math.random()*rem--));
+			Player traitor = players.remove(rng.nextInt(rem--));
 			traitor.setRole(Role.TRAITOR);
 			Attribution a = traitor.makeAttribution();
 			game.getMaster().notify(a);

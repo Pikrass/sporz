@@ -125,7 +125,7 @@ public class CustomRules extends Rules
 
 	private Player sample(List<Player> players) {
 		int rem = players.size();
-		return players.remove((int)Math.floor(Math.random()*rem));
+		return players.remove(rng.nextInt(rem));
 	}
 
 	private Player attribute(Game game, List<Player> players, Role role) {
