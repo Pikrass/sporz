@@ -4,6 +4,7 @@ import net.pikrass.sporz.*;
 
 import java.util.Iterator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,6 +29,13 @@ public class Hack extends PlayerAction<Hack.Do>
 	public Set<String> getChoices() {
 		clean();
 		return possibleChoices.keySet();
+	}
+
+	public Set<String> getPossibleChoices() {
+		clean();
+		Set<String> keys = new HashSet<String>(possibleChoices.keySet());
+		keys.remove(getLastChoice());
+		return keys;
 	}
 
 	public String getLastChoice() {
