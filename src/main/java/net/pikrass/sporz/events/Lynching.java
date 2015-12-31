@@ -20,10 +20,13 @@ public class Lynching extends Event
 		this.anonymous = new Anonymous();
 
 		this.counts = new HashMap<Player, Integer>();
-		for(Player p : votes.keySet())
-			counts.put(p, 0);
+
 		for(Player p : votes.values()) {
-			counts.put(p, counts.get(p) + 1);
+			Integer prev = counts.get(p);
+			if(prev == null)
+				prev = 0;
+
+			counts.put(p, prev + 1);
 		}
 	}
 
