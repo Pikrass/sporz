@@ -21,8 +21,10 @@ public class SettleLynch extends PlayerAction<SettleLynch.Do>
 	}
 
 	public void startAction() {
-		if(!lynch.isDraw())
+		if(!lynch.isDraw()) {
+			done(true);
 			return;
+		}
 
 		game.getCaptain().ask(game, this);
 	}
