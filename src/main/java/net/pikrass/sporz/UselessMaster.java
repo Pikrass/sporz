@@ -21,4 +21,5 @@ public class UselessMaster implements Master
 	public void notify(SpyReport event) { }
 	public void notify(Lynching event) { }
 	public void notify(LynchSettling event) { }
+	public void notify(EndGame event) { }
 }

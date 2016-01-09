@@ -278,6 +278,18 @@ public class TextPlayer extends Player
 		out.println("The captain, "+event.getOrigin()+" decided to kill "+event.getTarget());
 	}
 
+	@Override
+	public void notify(EndGame event) {
+		switch(event.getWinner()) {
+			case HUMANS:
+				out.println("HUMANS HAVE WON THE GAME"); break;
+			case MUTANTS:
+				out.println("MUTANTS HAVE WON THE GAME"); break;
+			case DRAW:
+				out.println("THE GAME FINISHED WITH NO WINNER"); break;
+		}
+	}
+
 
 	@Override
 	public void ask(final Game game, final ElectCaptain action) {

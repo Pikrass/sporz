@@ -140,6 +140,7 @@ public abstract class Player
 	public abstract void notify(SpyReport event);
 	public abstract void notify(Lynching.Anonymous event);
 	public abstract void notify(LynchSettling event);
+	public abstract void notify(EndGame event);
 
 	public abstract void ask(Game game, ElectCaptain action);
 	public abstract void ask(Game game, MutantsActions action);
@@ -214,6 +215,7 @@ public abstract class Player
 		public void notify(SpyReport event) { }
 		public void notify(Lynching.Anonymous event) { }
 		public void notify(LynchSettling event) { }
+		public void notify(EndGame event) { }
 
 		public void ask(Game game, ElectCaptain action) { }
 		public void ask(Game game, MutantsActions action) { }

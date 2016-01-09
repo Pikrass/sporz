@@ -8,6 +8,8 @@ import net.pikrass.sporz.actions.DoctorsAction;
 import net.pikrass.sporz.actions.ResetParalysis;
 import net.pikrass.sporz.actions.Lynch;
 import net.pikrass.sporz.actions.SettleLynch;
+import net.pikrass.sporz.actions.CheckEndGame;
+import net.pikrass.sporz.events.EndGame;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -70,12 +72,15 @@ public class Game
 
 		mutantsPhase.addAction(new SwitchPeriod(this));
 		mutantsPhase.addAction(this.mutantsActions);
+		mutantsPhase.addAction(new CheckEndGame(this, false));
 		doctorsPhase.addAction(this.doctorsAction);
+		doctorsPhase.addAction(new CheckEndGame(this, false));
 		dayPhase.addAction(new SwitchPeriod(this));
 		dayPhase.addAction(new ResetParalysis(this));
 		dayPhase.addAction(new ElectCaptain(this));
 		dayPhase.addAction(lynch);
 		settleLynchPhase.addAction(settle);
+		settleLynchPhase.addAction(new CheckEndGame(this, true));
 		captainPhase.addAction(new ElectCaptain(this));
 	}
 
@@ -108,11 +113,15 @@ public class Game
 		curPhase.run();
 	}
 
-	public void end() {
+	public void end(EndGame result) {
 		if(!started)
 			return;
 
 		curPhase.stop();
+
+		master.notify(result);
+		for(Player p : players.values())
+			p.notify(result);
 
 		started = false;
 	}
