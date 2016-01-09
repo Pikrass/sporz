@@ -11,11 +11,13 @@ public class Phase
 	private String name;
 	private List<Action> actions;
 	private int nbDone;
+	private boolean stopped;
 
 	public Phase(Game game, String name) {
 		this.game = game;
 		this.name = name;
 		this.actions = new ArrayList<Action>();
+		this.stopped = false;
 	}
 
 	public String getName() {
@@ -44,14 +46,19 @@ public class Phase
 		for(Action action : actions) {
 			action.stop();
 		}
+		this.stopped = true;
 	}
 
 	private void end() {
+		if(stopped)
+			return;
+
 		for(Action action : actions) {
 			action.execute();
 		}
 
-		game.step();
+		if(!stopped)
+			game.step();
 	}
 
 	public class Tracker {
