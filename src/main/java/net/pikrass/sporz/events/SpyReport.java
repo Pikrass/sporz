@@ -28,6 +28,10 @@ public class SpyReport extends Event {
 		return target;
 	}
 
+	public boolean hasResult() {
+		return !target.isNobody();
+	}
+
 	public SortedSet<Line> getResult() {
 		return result;
 	}

@@ -61,12 +61,12 @@ public class Spy extends PlayerAction<Spy.Do>
 
 		@Override
 		public void run(Game game) {
-			if(target.isNobody())
-				return;
-
 			SpyReport event = new SpyReport(spy, target);
-			for(Spyable action : actions)
-				action.spy(target, event);
+
+			if(!target.isNobody()) {
+				for(Spyable action : actions)
+					action.spy(target, event);
+			}
 
 			game.getMaster().notify(event);
 			spy.notify(event);
