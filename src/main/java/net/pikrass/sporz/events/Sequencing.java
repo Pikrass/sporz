@@ -6,13 +6,11 @@ public class Sequencing extends Event {
 	private Player origin;
 	private Player target;
 	private Genome result;
-	private Hacked hacked;
 
 	public Sequencing(Player origin, Player target) {
 		this.origin = origin;
 		this.target = target;
 		this.result = target.getGenome();
-		this.hacked = new Hacked();
 	}
 
 	public Player getOrigin() {
@@ -31,12 +29,18 @@ public class Sequencing extends Event {
 		return result;
 	}
 
-	public Hacked getHacked() {
-		return hacked;
+	public Hacked getHacked(Player hacker) {
+		return new Hacked(hacker);
 	}
 
 	public class Hacked {
-		private Hacked() {
+		private Player hacker;
+
+		private Hacked(Player hacker) {
+			this.hacker = hacker;
+		}
+		public Player getHacker() {
+			return hacker;
 		}
 		public Player getTarget() {
 			return Sequencing.this.getTarget();

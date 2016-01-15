@@ -91,8 +91,9 @@ public class Sequence extends PlayerAction<Sequence.Do>
 		}
 
 		public void hack(Game game, Player hacker) {
-			game.getMaster().notify(event.getHacked());
-			hacker.notify(event.getHacked());
+			Sequencing.Hacked hevent = event.getHacked(hacker);
+			game.getMaster().notify(hevent);
+			hacker.notify(hevent);
 		}
 
 		public void spy(Player target, SpyReport report) {

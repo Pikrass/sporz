@@ -6,19 +6,16 @@ public class MutantCount extends Event {
 	private Player origin;
 	private boolean hasResult;
 	private int result;
-	private Hacked hacked;
 
 	public MutantCount(Player origin, int count) {
 		this.origin = origin;
 		this.result = count;
 		this.hasResult = true;
-		this.hacked = new Hacked();
 	}
 
 	public MutantCount(Player origin) {
 		this.origin = origin;
 		this.hasResult = false;
-		this.hacked = new Hacked();
 	}
 
 	public Player getOrigin() {
@@ -33,12 +30,18 @@ public class MutantCount extends Event {
 		return result;
 	}
 
-	public Hacked getHacked() {
-		return hacked;
+	public Hacked getHacked(Player hacker) {
+		return new Hacked(hacker);
 	}
 
 	public class Hacked {
-		private Hacked() {
+		private Player hacker;
+
+		private Hacked(Player hacker) {
+			this.hacker = hacker;
+		}
+		public Player getHacker() {
+			return hacker;
 		}
 		public boolean hasResult() {
 			return MutantCount.this.hasResult();

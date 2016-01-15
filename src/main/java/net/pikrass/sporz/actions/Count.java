@@ -92,8 +92,9 @@ public class Count extends PlayerAction<Count.Do> implements Hackable {
 		}
 
 		public void hack(Game game, Player hacker) {
-			game.getMaster().notify(event.getHacked());
-			hacker.notify(event.getHacked());
+			MutantCount.Hacked hevent = event.getHacked(hacker);
+			game.getMaster().notify(hevent);
+			hacker.notify(hevent);
 		}
 	}
 }
