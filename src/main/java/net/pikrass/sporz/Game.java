@@ -173,6 +173,8 @@ public class Game
 	}
 
 	public void kill(Player player) {
+		if(this.captain.equals(player))
+			this.captain = null;
 		this.players.remove(player.getName());
 		player.kill();
 	}
